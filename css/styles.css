@@ -1,0 +1,152 @@
+#page
+{
+    white-space: nowrap;
+    background-color: #000000;
+}
+.tile
+{
+    display: block;
+    width: 64px;
+    height: 64px;
+    overflow:hidden;
+    position: absolute;
+}
+
+.empty
+{
+    background-color: black;
+    z-index: -1;
+}
+
+.edge
+{
+    width: 32px;
+    height: 32px;
+    position: absolute;
+}
+
+.wall
+{
+    background-image: url(../img/Wall.jpg);
+}
+
+.topLeft
+{
+    background-image: url(../img/WallTopLeft.jpg);
+}
+
+.topRight
+{
+    background-image: url(../img/WallTopRight.jpg);
+}
+
+.bottomLeft
+{
+    background-image: url(../img/WallBottomLeft.jpg);
+}
+
+.bottomRight
+{
+    background-image: url(../img/WallBottomRight.jpg);
+}
+
+.sides
+{
+    background-image: url(../img/WallSides.jpg);
+    width: 32px;
+    height: 64px;
+    position: absolute;
+}
+
+.topBottom
+{
+    background-image: url(../img/WallTopBottom.jpg); 
+    width: 64px;
+    height: 32px;
+    position:absolute;
+}
+
+.corner
+{
+    width: 32px;
+    height: 32px;
+    position: absolute;
+}
+
+.base
+{
+    background-image: url(../img/Base.jpg); 
+}
+
+.zonk
+{
+    background-image: url(../img/Zonk1.jpg); 
+}
+
+.Murphy
+{
+    background-image: url(../img/MurphySadFace.jpg);
+    position:absolute;
+    width:64px;
+    height:64px;
+}
+
+.infotron
+{
+    background-image: url(../img/Infotron.jpg);
+}
+
+.RAM-regular
+{
+    background-image: url(../img/RAM-regular.jpg);
+}
+
+.RAM-left
+{
+    background-image: url(../img/RAM-left.jpg);
+}
+
+.RAM-right
+{
+    background-image: url(../img/RAM-right.jpg);
+}
+
+.RAM-top
+{
+    background-image: url(../img/RAM-top.jpg);
+}
+
+.RAM-bottom
+{
+    background-image: url(../img/RAM-bottom.jpg);
+}
+
+.Explosion
+{
+    width: 64px;
+    height: 64px;
+    position: absolute;
+    display: block;
+    background: url(../img/Explosion.jpg) 0 0;
+    animation: Explode .45s steps(6);
+}
+
+@keyframes Explode {
+    100% { background-position: -384px; }
+}
+
+@-webkit-keyframes Explode {
+    100% { background-position: -384px; }
+}
+
+@-moz-keyframes Explode {
+    100% { background-position: -384px; }
+}
+
+@-ms-keyframes Explode {
+    100% { background-position: -384px; }
+}
+
+@-o-keyframes Explode {
+    100% { background-position: -384px; }
+}
