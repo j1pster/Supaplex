@@ -11,7 +11,7 @@ define("UNKNOWN", 1446);
 define("TITLE", 1468);
 define("FREEZE_ZONKS", 1469);
 
-$bytes = file_get_contents ('LEVELS.DAT');
+$bytes = file_get_contents ('./files/LEVELS.DAT');
 $ints = unpack("c*", $bytes);
 $hex = array_map('dechex', $ints);
 $level_map = array();

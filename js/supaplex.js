@@ -12,7 +12,7 @@ Supaplex.Scissors = [];
 
 Supaplex.Murphy = {};
 
-Supaplex.levelUrl = "../Supaplex/open.php";
+Supaplex.levelUrl = "../open.php";
 
 Supaplex.Explosions = [];
 
