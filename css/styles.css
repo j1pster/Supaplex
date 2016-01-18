@@ -1,8 +1,25 @@
+body {
+    overflow:hidden;
+    margin: 0;
+}
+
 #page
 {
     white-space: nowrap;
     background-color: #000000;
+    overflow:hidden;
 }
+
+#level
+{
+    position: absolute;
+    left:-1080px;
+    top:-510px;
+    width:3776px;
+    height:1472px;
+    background: black;
+}
+
 .tile
 {
     display: block;
@@ -60,7 +77,7 @@
 
 .topBottom
 {
-    background-image: url(../img/WallTopBottom.jpg); 
+    background-image: url(../img/WallTopBottom.jpg);
     width: 64px;
     height: 32px;
     position:absolute;
@@ -75,12 +92,12 @@
 
 .base
 {
-    background-image: url(../img/Base.jpg); 
+    background-image: url(../img/Base.jpg);
 }
 
 .zonk
 {
-    background-image: url(../img/Zonk1.jpg); 
+    background-image: url(../img/Zonk1.jpg);
 }
 
 .Murphy
@@ -129,6 +146,16 @@
     display: block;
     background: url(../img/Explosion.jpg) 0 0;
     animation: Explode .45s steps(6);
+}
+
+.MurphyMovingleft
+{
+    background: url(../img/MurphyMovingLeft.jpg) 0 0;
+    animation: MurphyMovingLeft .25s steps(3) infinite;
+}
+
+@keyframes MurphyMovingLeft {
+    100% { background-position: -192px;}
 }
 
 @keyframes Explode {
