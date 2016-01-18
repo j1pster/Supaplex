@@ -18,6 +18,7 @@ body {
     width:3776px;
     height:1472px;
     background: black;
+    z-index: -999
 }
 
 .tile
@@ -93,6 +94,7 @@ body {
 .base
 {
     background-image: url(../img/Base.jpg);
+    z-index: -1;
 }
 
 .zonk
@@ -106,6 +108,7 @@ body {
     position:absolute;
     width:64px;
     height:64px;
+    z-index: 1;
 }
 
 .infotron
@@ -148,13 +151,26 @@ body {
     animation: Explode .45s steps(6);
 }
 
-.MurphyMovingleft
+.MurphyMovingLeft
 {
     background: url(../img/MurphyMovingLeft.jpg) 0 0;
     animation: MurphyMovingLeft .25s steps(3) infinite;
+    z-index: 1;
 }
 
+.MurphyMovingRight
+{
+    background: url(../img/MurphyMovingRight.jpg) 0 0;
+    animation: MurphyMovingRight .25s steps(3) infinite;
+    z-index: 1;
+}
+
+
 @keyframes MurphyMovingLeft {
+    100% { background-position: -192px;}
+}
+
+@keyframes MurphyMovingRight {
     100% { background-position: -192px;}
 }
 
