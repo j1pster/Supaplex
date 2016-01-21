@@ -13,8 +13,8 @@ body {
 #level
 {
     position: absolute;
-    left:-1080px;
-    top:-510px;
+    left:0px;
+    top:0px;
     width:3776px;
     height:1472px;
     background: black;
