@@ -153,63 +153,6 @@ var Tile = {
 
 }
 
-/*function Tile(ID, locationX, locationY, type, exploding, bomb, movable, active, positionX, positionY) {
-    this.ID = ID;
-
-    // What's the current location in the level matrix?
-    this.locationY = locationY; // the Y location, corresponds to one of 24 arrays in the supaplex.level array.
-    this.locationX = locationX;// the X location, correponds to one of 60 tiles in Supaplex.level[locationY].
-    this.type = type; // What the fuck are we dealing with here?
-    this.classes = this.type + " tile"; // used for drawing purposes
-    this.exploding = exploding; // Can the element be blown up
-    this.bomb = bomb; // Can the object explode note: if set to true every active tile will explode.
-    this.movable = movable; // Can we push this thing?
-    this.moving = false;
-    this.direction = "";
-    this.active = active; // Can we actually do something with it?
-    //Used to save the current left and top positions
-    this.position = {}; // Nothing to see here, move on.
-    this.position.x = positionX;
-    this.position.y = positionY;
-    this.reserved = false;
-    //Stuff for moving
-    this.amountMoved = 0; // How many frames/pixels has it moved (probably a horrible idea to do it like this)
-    this.firstmove = false; // Since I updated the draw function I could probably deprecate this.
-    this.animationTiming;
-    // Move this Tile
-    // time: int, how long should the movement take in milliseconds
-    // direction: string, corresponds to one of the directions in Supaplex.DIRECTIONS
-    // spriteClass: Which sprite do we want to use for this movement?
-    this.move = function(time, direction, spriteClass){
-        Supaplex.TilesToUpdate.push(this);
-        if(this.firstmove == false) {
-            this.moving = true;
-            this.firstmove = true;
-            this.classes = "tile " + spriteClass;
-        }
-        var amountToMove = Supaplex.TILESIZE / (time / (1000 / Supaplex.FPS));
-        if(amountToMove >= Supaplex.TILESIZE - this.amountMoved) {
-            //amountToMove = Supaplex.TILESIZE - this.amountMoved;
-        }
-        this.position.x += amountToMove * Supaplex.DIRECTIONS[direction].x;
-        this.position.y += amountToMove * Supaplex.DIRECTIONS[direction].y;
-        this.amountMoved += amountToMove;
-        return;
-    }
-    this.checkForLastMove = function(direction) {
-        if(Math.round(this.amountMoved) >= Supaplex.TILESIZE) {
-            var neighbour = Supaplex.getNeighbour(this.locationY, this.locationX, direction);
-            Supaplex.changeLocation(this, neighbour);
-            this.position.x = (Supaplex.TILESIZE / 2) + (this.locationX - 1) * Supaplex.TILESIZE;
-            this.position.y = (Supaplex.TILESIZE / 2) + (this.locationY - 1) * Supaplex.TILESIZE;
-            this.firstmove = false;
-            this.amountMoved = 0;
-            this.moving = false;
-            neighbour.reserved = false;
-        }
-    }
-}*/
-
 /*********************************************************************************************************************/
 /******************************************* -- HELPER FUNCTIONS -- **************************************************/
 /*********************************************************************************************************************/
