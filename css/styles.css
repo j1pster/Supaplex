@@ -165,6 +165,12 @@ body {
     z-index: 1;
 }
 
+.Exit
+{
+    background: url(../img/Exit.jpg) 0 0;
+    z-index: 1;
+}
+
 
 @keyframes MurphyMovingLeft {
     100% { background-position: -192px;}

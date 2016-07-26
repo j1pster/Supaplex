@@ -6,7 +6,7 @@
 var Supaplex = {};
 
 Supaplex.init = function () {
-    Supaplex.level = []; //Contains every tile in a 2-dimensional array.
+    Supaplex.level = []; //Contains every tile in a 2-dimensional array
     Supaplex.Scissors = []; // Dunno if i'm going to use this yet
     Supaplex.TilesToUpdate = [];
     Supaplex.Murphy = {}; // Our hero!
@@ -16,11 +16,14 @@ Supaplex.init = function () {
     Supaplex.ExplosionCount = 0; // What was this for again?
     Supaplex.FPS = 32.0; // Usefull if people with crappy pc's can't handle it?
     Supaplex.ElapsedTime = 0; // Allright, maybe I'm using the times for something else.
+    Supaplex.levelInfo = {};
     Supaplex.Zonks = []; // Same as scissors, dunno if i'm going to use it yet.
+    Supaplex.infotronsCollected = 0;
     Supaplex.MainLoop;
     Supaplex.GamePaused = false; //Set to true if the game is paused.
     Supaplex.justUnPaused = false; //debuggin stuff....
     Supaplex.moveCounter = 0; // Also debug shit
+    Supaplex.levelElem = document.getElementById("level");
     Supaplex.viewport = {
         x: 0,
         y: 0
@@ -79,7 +82,78 @@ Supaplex.ANIMATION_TIMINGS = {
 /************************************************ -- TILE OBJECT -- **************************************************/
 /*********************************************************************************************************************/
 
-function Tile(ID, locationX, locationY, type, exploding, bomb, movable, active, positionX, positionY) {
+var Tile = {
+    init: function(ID, locationX, locationY, type, exploding, bomb, movable, active, positionX, positionY) {
+        this.ID = ID;
+        // What's the current location in the level matrix?
+        this.locationY = locationY; // the Y location, corresponds to one of 24 arrays in the supaplex.level array.
+        this.locationX = locationX;// the X location, correponds to one of 60 tiles in Supaplex.level[locationY].
+        this.type = type; // What the fuck are we dealing with here?
+        if(this.type === "sides" || this.type === "topBottom" || this.type === "topRight" || this.type === "topLeft" || this.type === "bottomRight" || this.type === "bottomLeft") {
+            this.classes = this.type + " edge";
+        }
+        else {
+            this.classes = this.type + " tile";
+        }
+        this.exploding = exploding; // Can the element be blown up
+        this.bomb = bomb; // Can the object explode note: if set to true every active tile will explode.
+        this.movable = movable; // Can we push this thing?
+        this.moving = false;
+        this.direction = "";
+        this.active = active; // Can we actually do something with it?
+        this.position = {
+            x: positionX,
+            y: positionY
+        }; // Nothing to see here, move on.
+        this.amountMoved = 0; // How many frames/pixels has it moved (probably a horrible idea to do it like this)
+        this.firstmove = false; // Since I updated the draw function I could probably deprecate this.
+        this.reserved = false;
+        this.$elem = document.createElement('div');
+        this.$elem.id = this.ID;
+        Supaplex.levelElem.appendChild(this.$elem);
+    },
+    draw: function() {
+        if(this.$elem) {
+            if(this.$elem.className != this.classes) {
+                this.$elem.className = this.classes;
+            }
+            this.$elem.style.left = this.position.x + "px";
+            this.$elem.style.top = this.position.y + "px";
+        }
+        return;
+    },
+    move: function(time, direction, spriteClass) {
+        if(this.firstmove == false) {
+            this.moving = true;
+            this.firstmove = true;
+            this.classes = "tile " + spriteClass;
+        }
+        var amountToMove = Supaplex.TILESIZE / (time / (1000 / Supaplex.FPS));
+        if(amountToMove >= Supaplex.TILESIZE - this.amountMoved) {
+            //amountToMove = Supaplex.TILESIZE - this.amountMoved;
+        }
+        this.position.x += amountToMove * Supaplex.DIRECTIONS[direction].x;
+        this.position.y += amountToMove * Supaplex.DIRECTIONS[direction].y;
+        this.amountMoved += amountToMove;
+        this.draw();
+        return;
+    },
+    checkForLastMove: function(direction, callback) {
+        if(Math.round(this.amountMoved) >= Supaplex.TILESIZE) {
+            var neighbour = Supaplex.getNeighbour(this.locationY, this.locationX, direction);
+            Supaplex.changeLocation(this, neighbour);
+            this.position.x = (Supaplex.TILESIZE / 2) + (this.locationX - 1) * Supaplex.TILESIZE;
+            this.position.y = (Supaplex.TILESIZE / 2) + (this.locationY - 1) * Supaplex.TILESIZE;
+            this.firstmove = false;
+            this.amountMoved = 0;
+            this.moving = false;
+            neighbour.reserved = false;
+        }
+    },
+
+}
+
+/*function Tile(ID, locationX, locationY, type, exploding, bomb, movable, active, positionX, positionY) {
     this.ID = ID;
 
     // What's the current location in the level matrix?
@@ -134,7 +208,7 @@ function Tile(ID, locationX, locationY, type, exploding, bomb, movable, active, 
             neighbour.reserved = false;
         }
     }
-}
+}*/
 
 /*********************************************************************************************************************/
 /******************************************* -- HELPER FUNCTIONS -- **************************************************/
@@ -167,22 +241,22 @@ Supaplex.get8Squares = function(elem) {
 // Perform a request to my open.php script, which will extract level data from the original levels.dat file
 // url: string, the url where the open.php script is located.
 // lvl: int, the number of the level which you want to load.
-Supaplex.getJson = function(url, lvl) {
+Supaplex.getJson = function(url, lvl, callback) {
     var xobj = new XMLHttpRequest();
     var params = "?level=" + lvl;
     var data;
-    xobj.open('GET', url + params, false);
+    xobj.open('GET', url + params, true);
 
     xobj.onreadystatechange = function(){
         if(xobj.readyState == 4 && xobj.status == "200") {
             if (xobj.responseText != undefined) {
                 data = JSON.parse(xobj.responseText);
+                console.log(data);
+                callback(data);
             }
         }
     };
     xobj.send();
-    console.log(data);
-    return data;
 };
 
 // Returns a Tile object based on the level data for that tile.
@@ -190,7 +264,7 @@ Supaplex.getJson = function(url, lvl) {
 // i: int, the Y position of the current tile
 // j: int, the X position of the current tile
 Supaplex.getTile = function(data, i, j){
-    var tile, positionY = i * 64, positionX = j * 64;
+    var tile = Object.create(Tile), positionY = i * 64, positionX = j * 64;
     if(i > 0) {
         positionY -= 32;
     }
@@ -200,25 +274,25 @@ Supaplex.getTile = function(data, i, j){
     //Tile (ID, locationX, locationY, type, exploding, bomb, movable, active, position.x, position.y);
     switch (data) {
         case "0":
-            tile = new Tile(i + "." + j, j, i, "empty", true, false, false, true, positionX, positionY);
+            tile.init(i + "." + j, j, i, "empty", true, false, false, true, positionX, positionY);
             break;
         case "1": //Zonk
             //Supaplex.Zonks.push({ZonkID: index2 + "." + index1, locationX: index2, locationY: index1});
-            tile = new Tile(i + "." + j, j, i, "zonk", true, false, true, true, positionX, positionY);
+            tile.init(i + "." + j, j, i, "zonk", true, false, true, true, positionX, positionY);
             break;
         case "2": //Base hardware
-            tile = new Tile(i + "." + j, j, i, "base", true, false, false, true, positionX, positionY);
+            tile.init(i + "." + j, j, i, "base", true, false, false, true, positionX, positionY);
             break;
         case "3": //Murphy
-            tile = new Tile(i + "." + j, j, i, "Murphy", true, true, false, true, positionX, positionY);
+            tile.init(i + "." + j, j, i, "Murphy", true, true, false, true, positionX, positionY);
             Supaplex.MurphyLocationX = i;
             Supaplex.MurphyLocationY = j;
             break;
         case "4": //Infotron
-            tile = new Tile(i + "." + j, j, i, "infotron", true, false, true, true, positionX, positionY);
+            tile.init(i + "." + j, j, i, "infotron", true, false, true, true, positionX, positionY);
             break;
         case "5": //RAM-regular, pins on 4 sides
-            tile = new Tile(i + "." + j, j, i, "RAM-regular", true, false, false, true, positionX, positionY);
+            tile.init(i + "." + j, j, i, "RAM-regular", true, false, false, true, positionX, positionY);
             break;
 
         case "6": //Walls
@@ -238,24 +312,29 @@ Supaplex.getTile = function(data, i, j){
             } else { //Regular walls inside the grid.
                 wallType = "wall";
             }
-            tile = new Tile(i + "." + j, j, i, wallType, false, false, false, true, positionX, positionY);
+            tile.init(i + "." + j, j, i, wallType, false, false, false, true, positionX, positionY);
+            break;
+
+        case "7":
+            console.log("Exit", j, i, data == "7")
+            tile.init(i + "." + j, j, i, "Exit", true, false, false, true, positionX, positionY);
             break;
 
         case "1a": //RAM horizontal, left part
-            tile = new Tile(i + "." + j, j, i, "RAM-left", true, false, false, true, positionX, positionY);
+            tile.init(i + "." + j, j, i, "RAM-left", true, false, false, true, positionX, positionY);
             break;
         case "1b": //RAM horizontal, right part
-            tile = new Tile(i + "." + j, j, i, "RAM-right", true, false, false, true, positionX, positionY);
+            tile.init(i + "." + j, j, i, "RAM-right", true, false, false, true, positionX, positionY);
             break;
 
         case "26": //RAM vertical, top part
-            tile = new Tile(i + "." + j, j, i, "RAM-top", true, false, false, true, positionX, positionY);
+            tile.init(i + "." + j, j, i, "RAM-top", true, false, false, true, positionX, positionY);
             break;
         case "27": //RAM vertical, bottom part
-            tile = new Tile(i + "." + j, j, i, "RAM-bottom", true, false, false, true, positionX, positionY);
+            tile.init(i + "." + j, j, i, "RAM-bottom", true, false, false, true, positionX, positionY);
             break;
         default: //I haven't yet included all of the sprites, so for now I'll default if there's anything else then the above mentioned case.
-            tile = new Tile(i + "." + j, j, i, "empty", true, false, false, true, positionX, positionY);
+            tile.init(i + "." + j, j, i, "empty", true, false, false, true, positionX, positionY);
             break;
     }
     return tile;
@@ -284,7 +363,7 @@ Supaplex.changeLocation = function (movingObject, neighbour) {
     neighbour.locationY = originalY;
     neighbour.position.x = 32 + ((neighbour.locationX - 1) * Supaplex.TILESIZE);
     neighbour.position.y = 32 + ((neighbour.locationY - 1) * Supaplex.TILESIZE);
-    Supaplex.TilesToUpdate.push(neighbour)
+    neighbour.draw();
 }
 
 /*********************************************************************************************************************/
@@ -293,23 +372,27 @@ Supaplex.changeLocation = function (movingObject, neighbour) {
 
 // data: json containing 2 objects, grid and info. The grid contains hexadecimal values corresponding to the tiles
 Supaplex.loadLevel = function (url, lvl) {
-    Supaplex.level = [];
-    var data = Supaplex.getJson(url, lvl);
+    Supaplex.getJson(url, lvl, Supaplex.buildLevel);
+};
+
+Supaplex.buildLevel = function (data) {
     var grid = data.grid; //["grid"]; //Only use the Grid object in data. there's more info in the Info object that I'll use later.
     for (var i = 0; i < grid.length; i++) {
         var row = [],
             obj = grid[i];
         for (var j = 0; j < obj.length; j++) {
-            row.push(Supaplex.getTile(obj[j], i, j));
+            var currentTile = Supaplex.getTile(obj[j], i, j)
+            currentTile.draw();
+            row.push(currentTile);
         }
         Supaplex.level.push(row);
     }
+    var info = data.info;
+    Supaplex.levelInfo.InfotronsNeeded = parseInt(info[30], 16);
     Supaplex.Murphy = Supaplex.level[Supaplex.MurphyLocationX][Supaplex.MurphyLocationY];
     Supaplex.Murphy.directionFacing = "MurphyMovingLeft";
-    var myHtml = Supaplex.drawLevel();
-    document.getElementById("level").innerHTML = myHtml;
     Supaplex.updateViewport();
-};
+}
 
 Supaplex.drawLevel = function () {
     var tiles = "";
@@ -516,6 +599,14 @@ Supaplex.logic = function() {
             if((neighbour.type == "empty" || neighbour.type == "base" || neighbour.type == "infotron") && !neighbour.reserved) {
                 Supaplex.Murphy.move(Supaplex.ANIMATION_TIMINGS.regularMove, Supaplex.Murphy.direction, Supaplex.Murphy.directionFacing);
                 Supaplex.updateViewport();
+                if(neighbour.type == "infotron") {
+                    Supaplex.infotronsCollected++;
+                }
+            }
+            else if (neighbour.type == "Exit") {
+                if(Supaplex.infotronsCollected >= Supaplex.levelInfo.InfotronsNeeded) {
+                    console.log("Good going, you won!");
+                }
             }
         }
     }
@@ -567,7 +658,7 @@ Supaplex.logic = function() {
             }
         }
     }
-    Supaplex.draw();
+    //Supaplex.draw();
 }
 
 Supaplex.PauseTheGame = function () {
@@ -607,19 +698,15 @@ Supaplex.updateViewport = function() {
     Supaplex.viewport.x = Supaplex.Murphy.position.x - (width / 2) + (Supaplex.TILESIZE / 2);
     Supaplex.viewport.y = Supaplex.Murphy.position.y - (height / 2) + (Supaplex.TILESIZE / 2);
     if (Supaplex.viewport.x > gameWindow.clientWidth - width) {
-        console.log("should be nearing the right end");
         Supaplex.viewport.x = gameWindow.clientWidth - width;
     }
     else if(Supaplex.viewport.x < 0) {
-        console.log("should be nearing the left end", Supaplex.viewport.x);
         Supaplex.viewport.x = 0
     }
     if (Supaplex.viewport.y > gameWindow.clientHeight - height) {
-        console.log("should be nearing the bottom end");
         Supaplex.viewport.y = gameWindow.clientHeight - height;
     }
     else if (Supaplex.viewport.y < 0) {
-        console.log("should be nearing the top end", Supaplex.viewport.y);
         Supaplex.viewport.y = 0;
     }
     gameWindow.style.top = "-" + Supaplex.viewport.y + "px";
@@ -633,7 +720,6 @@ Supaplex.updateViewport = function() {
 Supaplex.loop = function() {
     Supaplex.TimeDifference = (new Date().getTime() - Supaplex.STARTTIME) - Supaplex.ElapsedTime;
     Supaplex.ElapsedTime += 1000 / Supaplex.FPS;
-    console.log(new Date().getTime(), Supaplex.STARTTIME, Supaplex.ElapsedTime, ":", Supaplex.TimeDifference);
     Supaplex.loopCounter += 1;
     Supaplex.logic();
     Supaplex.MainLoop = setTimeout(Supaplex.loop, 1000 / Supaplex.FPS - Supaplex.TimeDifference);
