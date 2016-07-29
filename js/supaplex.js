@@ -25,9 +25,40 @@ Supaplex.init = function () {
     Supaplex.moveCounter = 0; // Also debug shit
     Supaplex.levelElem = document.getElementById("level");
     Supaplex.viewport = {
-        x: 0,
-        y: 0
+        init:function() {
+            this.x = 0;
+            this.y = 0;
+            this.viewportStyle = Supaplex.levelElem.style;
+            this.shouldUpdate = true;
+        },
+        updateViewport: function () {
+            if(this.shouldUpdate == true) {
+                var width = window.innerWidth,
+                height = window.innerHeight;
+                this.x = Supaplex.Murphy.position.x - (width / 2) + (Supaplex.TILESIZE / 2);
+                this.y = Supaplex.Murphy.position.y - (height / 2) + (Supaplex.TILESIZE / 2);
+                if (this.x > Supaplex.levelElem.clientWidth - width) {
+                    this.x = Supaplex.levelElem.clientWidth - width;
+                }
+                else if(this.x < 0) {
+                    this.x = 0
+                }
+                if (this.y > Supaplex.levelElem.clientHeight - height) {
+                    this.y = Supaplex.levelElem.clientHeight - height;
+                }
+                else if (this.y < 0) {
+                    this.y = 0;
+                }
+                this.viewportStyle.top = "-" + this.y + "px";
+                this.viewportStyle.left ="-" + this.x + "px";
+                //this.shouldUpdate = false;
+            }
+            else {
+                this.shouldUpdate = true;
+            }
+        }
     };
+    Supaplex.viewport.init();
 }
 
 // let's start this thing.
@@ -109,6 +140,7 @@ var Tile = {
         this.firstmove = false; // Since I updated the draw function I could probably deprecate this.
         this.reserved = false;
         this.$elem = document.createElement('div');
+        this.$elemStyle = this.$elem.style;
         this.$elem.id = this.ID;
         Supaplex.levelElem.appendChild(this.$elem);
     },
@@ -117,8 +149,8 @@ var Tile = {
             if(this.$elem.className != this.classes) {
                 this.$elem.className = this.classes;
             }
-            this.$elem.style.left = this.position.x + "px";
-            this.$elem.style.top = this.position.y + "px";
+            this.$elemStyle.left = this.position.x + "px";
+            this.$elemStyle.top = this.position.y + "px";
         }
         return;
     },
@@ -334,7 +366,7 @@ Supaplex.buildLevel = function (data) {
     Supaplex.levelInfo.InfotronsNeeded = parseInt(info[30], 16);
     Supaplex.Murphy = Supaplex.level[Supaplex.MurphyLocationX][Supaplex.MurphyLocationY];
     Supaplex.Murphy.directionFacing = "MurphyMovingLeft";
-    Supaplex.updateViewport();
+    Supaplex.viewport.updateViewport();
 }
 
 Supaplex.drawLevel = function () {
@@ -541,7 +573,7 @@ Supaplex.logic = function() {
             var neighbour = Supaplex.getNeighbour(Supaplex.Murphy.locationY, Supaplex.Murphy.locationX, Supaplex.Murphy.direction);
             if((neighbour.type == "empty" || neighbour.type == "base" || neighbour.type == "infotron") && !neighbour.reserved) {
                 Supaplex.Murphy.move(Supaplex.ANIMATION_TIMINGS.regularMove, Supaplex.Murphy.direction, Supaplex.Murphy.directionFacing);
-                Supaplex.updateViewport();
+                Supaplex.viewport.updateViewport();
                 if(neighbour.type == "infotron") {
                     Supaplex.infotronsCollected++;
                 }
@@ -555,7 +587,7 @@ Supaplex.logic = function() {
     }
     if(Supaplex.Murphy.moving == true) {
         Supaplex.Murphy.move(Supaplex.ANIMATION_TIMINGS.regularMove, Supaplex.Murphy.direction, + Supaplex.Murphy.directionFacing)
-        Supaplex.updateViewport()
+        Supaplex.viewport.updateViewport()
         Supaplex.Murphy.checkForLastMove(Supaplex.Murphy.direction);
     }
     for (var i = 0; i < Supaplex.level.length; i++) {
@@ -632,28 +664,6 @@ Supaplex.draw = function() {
         Supaplex.TilesToUpdate.pop();
     }
     return;
-}
-
-Supaplex.updateViewport = function() {
-    var width = window.innerWidth,
-    height = window.innerHeight,
-    gameWindow = document.getElementById("level");
-    Supaplex.viewport.x = Supaplex.Murphy.position.x - (width / 2) + (Supaplex.TILESIZE / 2);
-    Supaplex.viewport.y = Supaplex.Murphy.position.y - (height / 2) + (Supaplex.TILESIZE / 2);
-    if (Supaplex.viewport.x > gameWindow.clientWidth - width) {
-        Supaplex.viewport.x = gameWindow.clientWidth - width;
-    }
-    else if(Supaplex.viewport.x < 0) {
-        Supaplex.viewport.x = 0
-    }
-    if (Supaplex.viewport.y > gameWindow.clientHeight - height) {
-        Supaplex.viewport.y = gameWindow.clientHeight - height;
-    }
-    else if (Supaplex.viewport.y < 0) {
-        Supaplex.viewport.y = 0;
-    }
-    gameWindow.style.top = "-" + Supaplex.viewport.y + "px";
-    gameWindow.style.left ="-" + Supaplex.viewport.x + "px";
 }
 
 /*********************************************************************************************************************/
