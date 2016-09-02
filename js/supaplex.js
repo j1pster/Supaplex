@@ -28,34 +28,36 @@ Supaplex.init = function () {
         init:function() {
             this.x = 0;
             this.y = 0;
-            this.viewportStyle = Supaplex.levelElem.style;
-            this.shouldUpdate = true;
+            this.width = window.innerWidth;
+            this.height = window.innerHeight;
+            fastdom.measure(function() {
+                Supaplex.viewport.viewportStyle = Supaplex.levelElem.style;
+            });
         },
         updateViewport: function () {
-            if(this.shouldUpdate == true) {
-                var width = window.innerWidth,
-                height = window.innerHeight;
-                this.x = Supaplex.Murphy.position.x - (width / 2) + (Supaplex.TILESIZE / 2);
-                this.y = Supaplex.Murphy.position.y - (height / 2) + (Supaplex.TILESIZE / 2);
-                if (this.x > Supaplex.levelElem.clientWidth - width) {
-                    this.x = Supaplex.levelElem.clientWidth - width;
-                }
-                else if(this.x < 0) {
-                    this.x = 0
-                }
-                if (this.y > Supaplex.levelElem.clientHeight - height) {
-                    this.y = Supaplex.levelElem.clientHeight - height;
-                }
-                else if (this.y < 0) {
-                    this.y = 0;
-                }
-                this.viewportStyle.top = "-" + this.y + "px";
-                this.viewportStyle.left ="-" + this.x + "px";
-                //this.shouldUpdate = false;
+            fastdom.measure(measureViewport(this))
+            function measureViewport(elem) {
+                elem.levelWidth = Supaplex.levelElem.clientWidth;
+                elem.levelHeight = Supaplex.levelElem.clientHeight;
             }
-            else {
-                this.shouldUpdate = true;
+            this.x = Supaplex.Murphy.position.x - (this.width / 2) + (Supaplex.TILESIZE / 2);
+            this.y = Supaplex.Murphy.position.y - (this.height / 2) + (Supaplex.TILESIZE / 2);
+            if (this.x > this.levelWidth - this.width) {
+                this.x = this.levelWidth - this.width;
             }
+            else if(this.x < 0) {
+                this.x = 0
+            }
+            if (this.y > this.levelHeight - this.height) {
+                this.y = this.levelHeight - this.height;
+            }
+            else if (this.y < 0) {
+                this.y = 0;
+            }
+            fastdom.mutate(function() {
+                Supaplex.levelElem.top = "-" + Supaplex.viewport.y + "px";
+                Supaplex.levelElem.left = "-" + Supaplex.viewport.x + "px";
+            });
         }
     };
     Supaplex.viewport.init();
@@ -149,8 +151,11 @@ var Tile = {
             if(this.$elem.className != this.classes) {
                 this.$elem.className = this.classes;
             }
-            this.$elemStyle.left = this.position.x + "px";
-            this.$elemStyle.top = this.position.y + "px";
+            fastdom.mutate(actualDraw(this));
+        }
+        function actualDraw(elem) {
+            elem.$elemStyle.left = elem.position.x + "px";
+            elem.$elemStyle.top = elem.position.y + "px";
         }
         return;
     },
@@ -160,9 +165,9 @@ var Tile = {
             this.firstmove = true;
             this.classes = "tile " + spriteClass;
         }
-        var amountToMove = Supaplex.TILESIZE / (time / (1000 / Supaplex.FPS));
+        var amountToMove = Supaplex.TILESIZE / (time / (performance.now() - Supaplex.lastUpdated));
         if(amountToMove >= Supaplex.TILESIZE - this.amountMoved) {
-            //amountToMove = Supaplex.TILESIZE - this.amountMoved;
+            amountToMove = Supaplex.TILESIZE - this.amountMoved;
         }
         this.position.x += amountToMove * Supaplex.DIRECTIONS[direction].x;
         this.position.y += amountToMove * Supaplex.DIRECTIONS[direction].y;
@@ -675,5 +680,7 @@ Supaplex.loop = function() {
     Supaplex.ElapsedTime += 1000 / Supaplex.FPS;
     Supaplex.loopCounter += 1;
     Supaplex.logic();
-    Supaplex.MainLoop = setTimeout(Supaplex.loop, 1000 / Supaplex.FPS - Supaplex.TimeDifference);
+    Supaplex.lastUpdated =  performance.now();
+    requestAnimationFrame(Supaplex.loop);
+    //Supaplex.MainLoop = setTimeout(Supaplex.loop, 1000 / Supaplex.FPS - Supaplex.TimeDifference);
 };
