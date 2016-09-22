@@ -99,6 +99,11 @@ body, html {
     z-index: -1;
 }
 
+.FloppyYellow
+{
+    background-image: url(../img/FloppyYellow.jpg);
+}
+
 .zonk
 {
     background-image: url(../img/Zonk1.jpg);
@@ -167,6 +172,12 @@ body, html {
     z-index: 1;
 }
 
+.Terminal
+{
+    background: url(../img/TerminalAnimation.jpg) 0 0;
+    animation: TerminalAnimation 7s steps(7) infinite;
+}
+
 .Exit
 {
     background: url(../img/Exit.jpg) 0 0;
@@ -184,6 +195,10 @@ body, html {
 
 @keyframes Explode {
     100% { background-position: -384px; }
+}
+
+@keyframes TerminalAnimation {
+    100% { background-position: -448px; }
 }
 
 @-webkit-keyframes Explode {

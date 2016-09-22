@@ -7,8 +7,8 @@ var Supaplex = {};
 
 Supaplex.init = function () {
     Supaplex.level = []; //Contains every tile in a 2-dimensional array
+    Supaplex.tilesToUpdate = [];
     Supaplex.Scissors = []; // Dunno if i'm going to use this yet
-    Supaplex.TilesToUpdate = [];
     Supaplex.Murphy = {}; // Our hero!
     Supaplex.MurphyLocationX;
     Supaplex.MurphyLocationY;
@@ -18,28 +18,23 @@ Supaplex.init = function () {
     Supaplex.ElapsedTime = 0; // Allright, maybe I'm using the times for something else.
     Supaplex.levelInfo = {};
     Supaplex.Zonks = []; // Same as scissors, dunno if i'm going to use it yet.
+    Supaplex.YellowFloppies = [];
     Supaplex.infotronsCollected = 0;
     Supaplex.MainLoop;
-    Supaplex.GamePaused = false; //Set to true if the game is paused.
+    Supaplex.gamePaused = false; //Set to true if the game is paused.
     Supaplex.justUnPaused = false; //debuggin stuff....
     Supaplex.moveCounter = 0; // Also debug shit
     Supaplex.levelElem = document.getElementById("level");
     Supaplex.viewport = {
-        init:function() {
+        init:function () {
             this.x = 0;
             this.y = 0;
             this.width = window.innerWidth;
             this.height = window.innerHeight;
-            fastdom.measure(function() {
-                Supaplex.viewport.viewportStyle = Supaplex.levelElem.style;
-            });
+            this.levelWidth = Supaplex.levelElem.clientWidth;
+            this.levelHeight = Supaplex.levelElem.clientHeight;
         },
         updateViewport: function () {
-            fastdom.measure(measureViewport(this))
-            function measureViewport(elem) {
-                elem.levelWidth = Supaplex.levelElem.clientWidth;
-                elem.levelHeight = Supaplex.levelElem.clientHeight;
-            }
             this.x = Supaplex.Murphy.position.x - (this.width / 2) + (Supaplex.TILESIZE / 2);
             this.y = Supaplex.Murphy.position.y - (this.height / 2) + (Supaplex.TILESIZE / 2);
             if (this.x > this.levelWidth - this.width) {
@@ -54,10 +49,8 @@ Supaplex.init = function () {
             else if (this.y < 0) {
                 this.y = 0;
             }
-            fastdom.mutate(function() {
-                Supaplex.levelElem.top = "-" + Supaplex.viewport.y + "px";
-                Supaplex.levelElem.left = "-" + Supaplex.viewport.x + "px";
-            });
+            Supaplex.levelElem.style.top = "-" + this.y + "px";
+            Supaplex.levelElem.style.left = "-" + this.x + "px";
         }
     };
     Supaplex.viewport.init();
@@ -68,7 +61,6 @@ window.onload = function(){
     Supaplex.init();
     Supaplex.loadLevel(Supaplex.LEVELURL, 1);
     Supaplex.STARTTIME = new Date().getTime(); // I moved this here because otherwise I would get weird speed bugs at the start
-    Supaplex.loop();
     document.addEventListener("keydown", Supaplex.onKeyDown);
     document.addEventListener("keyup", Supaplex.onKeyUp);
     document.addEventListener("visibilitychange", Supaplex.handleVisibilityChange, false);
@@ -128,6 +120,7 @@ var Tile = {
         else {
             this.classes = this.type + " tile";
         }
+        this.lastClasses = "";
         this.exploding = exploding; // Can the element be blown up
         this.bomb = bomb; // Can the object explode note: if set to true every active tile will explode.
         this.movable = movable; // Can we push this thing?
@@ -141,22 +134,21 @@ var Tile = {
         this.amountMoved = 0; // How many frames/pixels has it moved (probably a horrible idea to do it like this)
         this.firstmove = false; // Since I updated the draw function I could probably deprecate this.
         this.reserved = false;
+        this.reservedBy;
         this.$elem = document.createElement('div');
         this.$elemStyle = this.$elem.style;
         this.$elem.id = this.ID;
         Supaplex.levelElem.appendChild(this.$elem);
     },
+    measure: function() {
+        this.lastClasses = this.$elem.className;
+    },
     draw: function() {
-        if(this.$elem) {
-            if(this.$elem.className != this.classes) {
-                this.$elem.className = this.classes;
-            }
-            fastdom.mutate(actualDraw(this));
+        if(this.lastClasses != this.classes) {
+            this.$elem.className = this.classes;
         }
-        function actualDraw(elem) {
-            elem.$elemStyle.left = elem.position.x + "px";
-            elem.$elemStyle.top = elem.position.y + "px";
-        }
+        this.$elemStyle.left = this.position.x + "px";
+        this.$elemStyle.top = this.position.y + "px";
         return;
     },
     move: function(time, direction, spriteClass) {
@@ -165,14 +157,14 @@ var Tile = {
             this.firstmove = true;
             this.classes = "tile " + spriteClass;
         }
-        var amountToMove = Supaplex.TILESIZE / (time / (performance.now() - Supaplex.lastUpdated));
+        var amountToMove = Supaplex.TILESIZE / (time / (performance.now() - Supaplex.lastLogicUpdate));
         if(amountToMove >= Supaplex.TILESIZE - this.amountMoved) {
             amountToMove = Supaplex.TILESIZE - this.amountMoved;
         }
         this.position.x += amountToMove * Supaplex.DIRECTIONS[direction].x;
         this.position.y += amountToMove * Supaplex.DIRECTIONS[direction].y;
         this.amountMoved += amountToMove;
-        this.draw();
+        Supaplex.tilesToUpdate.push(this);
         return;
     },
     checkForLastMove: function(direction, callback) {
@@ -231,7 +223,6 @@ Supaplex.getJson = function(url, lvl, callback) {
         if(xobj.readyState == 4 && xobj.status == "200") {
             if (xobj.responseText != undefined) {
                 data = JSON.parse(xobj.responseText);
-                console.log(data);
                 callback(data);
             }
         }
@@ -296,8 +287,16 @@ Supaplex.getTile = function(data, i, j){
             break;
 
         case "7":
-            console.log("Exit", j, i, data == "7")
             tile.init(i + "." + j, j, i, "Exit", true, false, false, true, positionX, positionY);
+            break;
+
+        case "12":
+            tile.init(i + "." + j, j, i, "FloppyYellow", true, true, false, true, positionX, positionY);
+            Supaplex.YellowFloppies.push(tile);
+            break;
+
+        case "13":
+            tile.init(i + "." + j, j, i, "Terminal", true, false, false, true, positionX, positionY);
             break;
 
         case "1a": //RAM horizontal, left part
@@ -313,7 +312,7 @@ Supaplex.getTile = function(data, i, j){
         case "27": //RAM vertical, bottom part
             tile.init(i + "." + j, j, i, "RAM-bottom", true, false, false, true, positionX, positionY);
             break;
-        default: //I haven't yet included all of the sprites, so for now I'll default if there's anything else then the above mentioned case.
+        default: //I haven't yet included all of the sprites, so for now I'll default if there's anything else than the above mentioned case.
             tile.init(i + "." + j, j, i, "empty", true, false, false, true, positionX, positionY);
             break;
     }
@@ -343,7 +342,7 @@ Supaplex.changeLocation = function (movingObject, neighbour) {
     neighbour.locationY = originalY;
     neighbour.position.x = 32 + ((neighbour.locationX - 1) * Supaplex.TILESIZE);
     neighbour.position.y = 32 + ((neighbour.locationY - 1) * Supaplex.TILESIZE);
-    neighbour.draw();
+    Supaplex.tilesToUpdate.push(neighbour);
 }
 
 /*********************************************************************************************************************/
@@ -372,6 +371,9 @@ Supaplex.buildLevel = function (data) {
     Supaplex.Murphy = Supaplex.level[Supaplex.MurphyLocationX][Supaplex.MurphyLocationY];
     Supaplex.Murphy.directionFacing = "MurphyMovingLeft";
     Supaplex.viewport.updateViewport();
+    Supaplex.loop();
+    Supaplex.logic();
+    console.log("I should update the viewport now...");
 }
 
 Supaplex.drawLevel = function () {
@@ -432,10 +434,12 @@ Supaplex.onKeyDown = function(event) {
             break;
 
         case Supaplex.keyBoard.getValue("p"):
-            if(Supaplex.GamePaused) {
+            if(Supaplex.gamePaused) {
                 Supaplex.UnPauseTheGame();
+                console.log("unpause");
             } else {
                 Supaplex.PauseTheGame();
+                console.log("pause");
             }
             break;
 
@@ -588,6 +592,15 @@ Supaplex.logic = function() {
                     console.log("Good going, you won!");
                 }
             }
+            else if(neighbour.type == "Terminal") {
+                if(Supaplex.YellowFloppies.length != 0) {
+                    for(var i = Supaplex.YellowFloppies.length - 1; i >= 0; i--) {
+                        Supaplex.Explode(Supaplex.YellowFloppies[i]);
+                        Supaplex.YellowFloppies.pop();
+                    }
+                }
+            }
+
         }
     }
     if(Supaplex.Murphy.moving == true) {
@@ -607,6 +620,7 @@ Supaplex.logic = function() {
                         currentTile.move(Supaplex.ANIMATION_TIMINGS.regularMove, "down", currentTile.type);
                         currentTile.animationTiming = Supaplex.ANIMATION_TIMINGS.regularMove;
                         underneathZonk.reserved = true;
+                        underneathZonk.reservedBy = currentTile;
                         currentTile.direction = "down";
                     }
                     else if ((underneathZonk.type == "zonk" || underneathZonk.type == "infotron") && underneathZonk.moving == false) {
@@ -638,19 +652,21 @@ Supaplex.logic = function() {
             }
         }
     }
+    Supaplex.lastLogicUpdate = performance.now();
+    return;
     //Supaplex.draw();
 }
 
 Supaplex.PauseTheGame = function () {
-    clearInterval(Supaplex.MainLoop);
-    Supaplex.GamePaused = true;
-    Supaplex.justUnPaused = false;
+    cancelAnimationFrame(Supaplex.AnimationFrameID);
+    Supaplex.Murphy.$elem.style.webkitAnimationPlayState = "paused";
+    Supaplex.gamePaused = true;
 }
 
 Supaplex.UnPauseTheGame = function () {
-    Supaplex.justUnPaused = true;
-    Supaplex.loop();
-    Supaplex.GamePaused = false;
+    requestAnimationFrame(Supaplex.loop);
+    Supaplex.Murphy.$elem.style.webkitAnimationPlayState = "running";
+    Supaplex.gamePaused = false;
 }
 
 /*********************************************************************************************************************/
@@ -658,16 +674,15 @@ Supaplex.UnPauseTheGame = function () {
 /*********************************************************************************************************************/
 
 Supaplex.draw = function() {
-    for(var i = Supaplex.TilesToUpdate.length - 1; i > 0; i--) {
-        var element = Supaplex.TilesToUpdate[i],
-        DOMelement = document.getElementById(element.ID);
-        DOMelement.style.left = element.position.x + "px";
-        DOMelement.style.top = element.position.y + "px";
-        if (DOMelement.className != element.classes) {
-            DOMelement.className = element.classes;
-        }
-        Supaplex.TilesToUpdate.pop();
+    for(var i = Supaplex.tilesToUpdate.length - 1; i >= 0; i--) {
+        Supaplex.tilesToUpdate[i].measure();
     }
+    for(var i = Supaplex.tilesToUpdate.length - 1; i >= 0; i--) {
+        var element = Supaplex.tilesToUpdate[i];
+        element.draw();
+        Supaplex.tilesToUpdate.pop();
+    }
+    //Supaplex.viewport.updateViewport();
     return;
 }
 
@@ -676,11 +691,12 @@ Supaplex.draw = function() {
 /*********************************************************************************************************************/
 
 Supaplex.loop = function() {
-    Supaplex.TimeDifference = (new Date().getTime() - Supaplex.STARTTIME) - Supaplex.ElapsedTime;
-    Supaplex.ElapsedTime += 1000 / Supaplex.FPS;
-    Supaplex.loopCounter += 1;
+    //Supaplex.TimeDifference = (new Date().getTime() - Supaplex.STARTTIME) - Supaplex.ElapsedTime;
+    //Supaplex.ElapsedTime += 1000 / Supaplex.FPS;
+    //Supaplex.loopCounter += 1;
     Supaplex.logic();
-    Supaplex.lastUpdated =  performance.now();
-    requestAnimationFrame(Supaplex.loop);
+    Supaplex.draw();
+    Supaplex.lastLogicUpdate = performance.now();
+    Supaplex.AnimationFrameID = requestAnimationFrame(Supaplex.loop);
     //Supaplex.MainLoop = setTimeout(Supaplex.loop, 1000 / Supaplex.FPS - Supaplex.TimeDifference);
 };
