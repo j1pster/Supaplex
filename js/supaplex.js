@@ -179,6 +179,22 @@ var Tile = {
             neighbour.reserved = false;
         }
     },
+    getNeighbour: function(direction) {
+        return Supaplex.level[this.locationY + Supaplex.DIRECTIONS[direction].y * 1][this.locationX + Supaplex.DIRECTIONS[direction].x * 1];
+    },
+    getAllNeighbours: function() {
+        var allNeighbours = {
+            "topLeft": Supaplex.level[this.locationY - 1][this.locationX - 1],
+            "top": Supaplex.level[this.locationY-1][this.locationX],
+            "topRight": Supaplex.level[this.locationY-1][this.locationX + 1],
+            "left": Supaplex.level[this.locationY][this.locationX - 1],
+            "right": Supaplex.level[this.locationY][this.locationX + 1],
+            "bottomLeft": Supaplex.level[this.locationY + 1][this.locationX - 1],
+            "bottom": Supaplex.level[this.locationY + 1][this.locationX],
+            "bottomRight": Supaplex.level[this.locationY + 1][this.locationX + 1]
+        }
+        return allNeighbours;
+    }
 
 }
 
@@ -290,6 +306,30 @@ Supaplex.getTile = function(data, i, j){
             tile.init(i + "." + j, j, i, "Exit", true, false, false, true, positionX, positionY);
             break;
 
+        case "8":
+            tile.init(i + "." + j, j, i, "FloppyOrange", true, true, true, true, positionX, positionY);
+            break;
+
+        case "9":
+            tile.init(i + "." + j, j, i, "PortRight", true, false, false, true, positionX, positionY);
+            break;
+
+        case "0A":
+            tile.init(i + "." + j, j, i, "PortDown", true, false, false, true, positionX, positionY);
+            break;
+
+        case "0B":
+            tile.init(i + "." + j, j, i, "PortLeft", true, false, false, true, positionX, positionY);
+            break;
+
+        case "0C":
+            tile.init(i + "." + j, j, i, "PortUp", true, false, false, true, positionX, positionY);
+            break;
+
+        case "11":
+            tile.init(i + "." + j, j, i, "SnikSnak", true, false, false, true, positionX, positionY);
+            break;
+
         case "12":
             tile.init(i + "." + j, j, i, "FloppyYellow", true, true, false, true, positionX, positionY);
             Supaplex.YellowFloppies.push(tile);
@@ -297,6 +337,10 @@ Supaplex.getTile = function(data, i, j){
 
         case "13":
             tile.init(i + "." + j, j, i, "Terminal", true, false, false, true, positionX, positionY);
+            break;
+
+        case "14":
+            tile.init(i + "." + j, j, i, "FloppyRed", true, false, false, true, positionX, positionY);
             break;
 
         case "1a": //RAM horizontal, left part
@@ -343,6 +387,7 @@ Supaplex.changeLocation = function (movingObject, neighbour) {
     neighbour.position.x = 32 + ((neighbour.locationX - 1) * Supaplex.TILESIZE);
     neighbour.position.y = 32 + ((neighbour.locationY - 1) * Supaplex.TILESIZE);
     Supaplex.tilesToUpdate.push(neighbour);
+    neighbour.reserved = false;
 }
 
 /*********************************************************************************************************************/
@@ -376,22 +421,10 @@ Supaplex.buildLevel = function (data) {
     console.log("I should update the viewport now...");
 }
 
-Supaplex.drawLevel = function () {
-    var tiles = "";
-    for (var i = 0; i < Supaplex.level.length; i++) {
-        var currentRow = Supaplex.level[i];
-        for (var j = 0; j < currentRow.length; j++) {
-            var currentTile = Supaplex.level[i][j],
-            tileType = currentTile.type;
-            if(tileType === "sides" || tileType === "topBottom" || tileType === "topRight" || tileType === "topLeft" || tileType === "bottomRight" || tileType === "bottomLeft") {
-                tiles += "<div class=\"" + tileType + " edge\" id=" + currentTile.ID + " style=\" top: " + currentTile.position.y + "px; left: " + currentTile.position.x + "px;\"></div>";
-            } else {
-                tiles += "<div class=\"" + tileType + " tile\" id=" + currentTile.ID + " style=\" top: " + currentTile.position.y + "px; left: " + currentTile.position.x + "px;\"></div>";
-            }
-        }
-    }
-    return tiles;
-};
+Supaplex.resetLevel = function () {
+    Supaplex.levelElem.innerHTML = "";
+    Supaplex.init();
+}
 
 /*********************************************************************************************************************/
 /************************************************* -- EVENTS -- ******************************************************/
@@ -421,6 +454,8 @@ Supaplex.keyBoard.moveUp = false;
 Supaplex.keyBoard.moveRight = false;
 Supaplex.keyBoard.moveDown = false;
 
+Supaplex.keyBoard.spaceDown = false;
+
 // key event for onKeyDown
 // event: The event which was broadcast.
 Supaplex.onKeyDown = function(event) {
@@ -430,7 +465,7 @@ Supaplex.onKeyDown = function(event) {
             break;
         //
         case Supaplex.keyBoard.getValue("space"):
-            //TODO: build in the space command.
+            Supaplex.spaceDown = true;
             break;
 
         case Supaplex.keyBoard.getValue("p"):
@@ -494,30 +529,33 @@ Supaplex.pausedKeyDown = function(event) {
 // event: The event that was broadcast
 Supaplex.onKeyUp = function(event) {
     switch(event.keyCode) {
-      case Supaplex.keyBoard.getValue("left"):
-          if (!Supaplex.GamePaused) {
-              Supaplex.keyBoard.moving = false;
-          }
-          break;
+        case Supaplex.keyBoard.getValue("left"):
+            if (!Supaplex.GamePaused) {
+                Supaplex.keyBoard.moving = false;
+            }
+            break;
 
+        case Supaplex.keyBoard.getValue("space"):
+            Supaplex.keyBoard.spaceDown = true;
+            break;
 
-      case Supaplex.keyBoard.getValue("up"):
-          if (!Supaplex.GamePaused) {
-              Supaplex.keyBoard.moving = false;
-          }
-          break;
+        case Supaplex.keyBoard.getValue("up"):
+            if (!Supaplex.GamePaused) {
+                Supaplex.keyBoard.moving = false;
+            }
+            break;
 
-      case Supaplex.keyBoard.getValue("right"):
-          if (!Supaplex.GamePaused) {
-              Supaplex.keyBoard.moving = false;
-          }
-          break;
+            case Supaplex.keyBoard.getValue("right"):
+            if (!Supaplex.GamePaused) {
+                Supaplex.keyBoard.moving = false;
+            }
+            break;
 
-      case Supaplex.keyBoard.getValue("down"):
-          if (!Supaplex.GamePaused) {
-              Supaplex.keyBoard.moving = false;
-          }
-          break;
+        case Supaplex.keyBoard.getValue("down"):
+            if (!Supaplex.GamePaused) {
+                Supaplex.keyBoard.moving = false;
+            }
+            break;
     }
 }
 
@@ -612,33 +650,32 @@ Supaplex.logic = function() {
         for (var j = 0; j < Supaplex.level[i].length; j++) {
             var currentTile = Supaplex.level[i][j];
             if (currentTile.type == "zonk" || currentTile.type == "infotron") {
-                var underneathZonk = Supaplex.getNeighbour(currentTile.locationY, currentTile.locationX, "down");
                 var aboveZonk = Supaplex.getNeighbour(currentTile.locationY, currentTile.locationX, "up");
-                var neighbours = Supaplex.get8Squares(currentTile);
+                var allNeighbours = currentTile.getAllNeighbours();
                 if (currentTile.moving == false) {
-                    if (underneathZonk.type == "empty") {
+                    if (allNeighbours.bottom.type == "empty" && (!allNeighbours.bottom.reserved || allNeighbours.bottom.reservedBy == currentTile)) {
                         currentTile.move(Supaplex.ANIMATION_TIMINGS.regularMove, "down", currentTile.type);
                         currentTile.animationTiming = Supaplex.ANIMATION_TIMINGS.regularMove;
-                        underneathZonk.reserved = true;
-                        underneathZonk.reservedBy = currentTile;
+                        allNeighbours.bottom.reserved = true;
+                        allNeighbours.bottom.reservedBy = currentTile;
                         currentTile.direction = "down";
                     }
-                    else if ((underneathZonk.type == "zonk" || underneathZonk.type == "infotron") && underneathZonk.moving == false) {
-                        var UnderNeighbourLeft = Supaplex.getNeighbour(underneathZonk.locationY, underneathZonk.locationX, "left");
-                        var UnderNeighbourRight = Supaplex.getNeighbour(underneathZonk.locationY, underneathZonk.locationX, "right");
-                        var aboveNeighbourLeft = Supaplex.getNeighbour(aboveZonk.locationY, aboveZonk.locationX, "left");
-                        var aboveNeighbourRight = Supaplex.getNeighbour(aboveZonk.locationY, aboveZonk.locationX, "right");
-                        if (UnderNeighbourLeft.type == "empty" && neighbours[3].reserved == false && neighbours[3].type == "empty") {
+                    else if ((allNeighbours.bottom.type == "zonk" || allNeighbours.bottom.type == "infotron" || allNeighbours.bottom.type == "RAM" ||
+                    allNeighbours.bottom.type == "RAM-top" || allNeighbours.bottom.type == "RAM-left" || allNeighbours.bottom.type == "RAM-right" ||
+                    allNeighbours.bottom.type == "RAM-bottom" || allNeighbours.bottom.type == "RAM-regular") && allNeighbours.bottom.moving == false) {
+                        if (allNeighbours.bottomLeft.type == "empty" && allNeighbours.left.reserved == false && allNeighbours.left.type == "empty") {
                             currentTile.move(Supaplex.ANIMATION_TIMINGS.zonkSideFall, "left", currentTile.type);
-                            UnderNeighbourLeft.reserved = true;
-                            neighbours[3].reserved = true;
+                            allNeighbours.bottomLeft.reserved = true;
+                            allNeighbours.bottomLeft.reservedBy = currentTile;
+                            allNeighbours.left.reserved = true;
                             currentTile.direction = "left";
                             currentTile.animationTiming = Supaplex.ANIMATION_TIMINGS.zonkSideFall;
                         }
-                        else if (UnderNeighbourRight.type == "empty" && neighbours[5].reserved == false && neighbours[5].type == "empty") {
+                        else if (allNeighbours.bottomRight.type == "empty" && allNeighbours.right.reserved == false && allNeighbours.right.type == "empty") {
                             currentTile.move(Supaplex.ANIMATION_TIMINGS.zonkSideFall, "right", currentTile.type);
-                            UnderNeighbourRight.reserved = true;
-                            neighbours[5].reserved = true;
+                            allNeighbours.bottomRight.reserved = true;
+                            allNeighbours.bottomRight.reservedBy = currentTile;
+                            allNeighbours.right.reserved = true;
                             currentTile.direction = "right";
                             currentTile.animationTiming = Supaplex.ANIMATION_TIMINGS.zonkSideFall;
                         }

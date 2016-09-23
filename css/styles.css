@@ -5,15 +5,13 @@ body, html {
     width: 100%;
 }
 
-#page
-{
+#page {
     white-space: nowrap;
     background-color: #000000;
     overflow:hidden;
 }
 
-#level
-{
+#level {
     position: absolute;
     left:0px;
     top:0px;
@@ -22,9 +20,8 @@ body, html {
     background: black;
     z-index: -999
 }
-
-.tile
-{
+/*---------------Basic Tiles & Walls---------------- */
+.tile {
     display: block;
     width: 64px;
     height: 64px;
@@ -32,85 +29,86 @@ body, html {
     position: absolute;
 }
 
-.empty
-{
+.empty {
     background-color: black;
     z-index: -1;
 }
 
-.edge
-{
+.edge {
     width: 32px;
     height: 32px;
     position: absolute;
 }
 
-.wall
-{
+.wall {
     background-image: url(../img/Wall.jpg);
 }
 
-.topLeft
-{
+.topLeft {
     background-image: url(../img/WallTopLeft.jpg);
 }
 
-.topRight
-{
+.topRight {
     background-image: url(../img/WallTopRight.jpg);
 }
 
-.bottomLeft
-{
+.bottomLeft {
     background-image: url(../img/WallBottomLeft.jpg);
 }
 
-.bottomRight
-{
+.bottomRight {
     background-image: url(../img/WallBottomRight.jpg);
 }
 
-.sides
-{
+.sides {
     background-image: url(../img/WallSides.jpg);
     width: 32px;
     height: 64px;
     position: absolute;
 }
 
-.topBottom
-{
+.topBottom {
     background-image: url(../img/WallTopBottom.jpg);
     width: 64px;
     height: 32px;
     position:absolute;
 }
 
-.corner
-{
+.corner {
     width: 32px;
     height: 32px;
     position: absolute;
 }
 
-.base
-{
+.base {
     background-image: url(../img/Base.jpg);
     z-index: -1;
 }
 
-.FloppyYellow
-{
+/*----------------------------Other Tiles-------------------------- */
+/*---------------Floppies, RAM, zonks, Murphy, etc.---------------- */
+.Exit {
+    background: url(../img/Exit.jpg) 0 0;
+    z-index: 1;
+}
+
+.FloppyYellow {
     background-image: url(../img/FloppyYellow.jpg);
 }
 
-.zonk
-{
-    background-image: url(../img/Zonk1.jpg);
+.FloppyOrange {
+    background-image: url(../img/FloppyOrange.jpg);
 }
 
-.Murphy
-{
+.FloppyRed {
+    background-image: url(../img/FloppyRed.jpg);
+}
+
+.infotron {
+    background-image: url(../img/Infotron.jpg);
+}
+
+.Murphy {
     background-image: url(../img/MurphySadFace.jpg);
     position:absolute;
     width:64px;
@@ -118,38 +116,48 @@ body, html {
     z-index: 1;
 }
 
-.infotron
-{
-    background-image: url(../img/Infotron.jpg);
+.PortDown {
+    background-image: url(../img/PortDown.jpg);
 }
 
-.RAM-regular
-{
+.PortLeft {
+    background-image: url(../img/PortLeft.jpg);
+}
+
+.PortRight {
+    background-image: url(../img/PortRight.jpg);
+}
+
+.PortUp {
+    background-image: url(../img/PortUp.jpg);
+}
+
+.RAM-regular {
     background-image: url(../img/RAM-regular.jpg);
 }
 
-.RAM-left
-{
+.RAM-left {
     background-image: url(../img/RAM-left.jpg);
 }
 
-.RAM-right
-{
+.RAM-right {
     background-image: url(../img/RAM-right.jpg);
 }
 
-.RAM-top
-{
+.RAM-top {
     background-image: url(../img/RAM-top.jpg);
 }
 
-.RAM-bottom
-{
+.RAM-bottom {
     background-image: url(../img/RAM-bottom.jpg);
 }
 
-.Explosion
-{
+.zonk {
+    background-image: url(../img/Zonk1.jpg);
+}
+/*---------------Animated Tiles---------------- */
+
+.Explosion {
     width: 64px;
     height: 64px;
     position: absolute;
@@ -158,32 +166,37 @@ body, html {
     animation: Explode .45s steps(6);
 }
 
-.MurphyMovingLeft
-{
+.EatTile {
+    width: 64px;
+    height: 64px;
+    position: absolute;
+    display: block;
+    background: url(../img/EatTileAnimation.jpg) 0 0;
+    animation: EatTile .5s steps(6);
+}
+
+.MurphyMovingLeft {
     background: url(../img/MurphyMovingLeft.jpg) 0 0;
     animation: MurphyMovingLeft .25s steps(3) infinite;
     z-index: 1;
 }
 
-.MurphyMovingRight
-{
+.MurphyMovingRight {
     background: url(../img/MurphyMovingRight.jpg) 0 0;
     animation: MurphyMovingRight .25s steps(3) infinite;
     z-index: 1;
 }
 
-.Terminal
-{
+.Terminal {
     background: url(../img/TerminalAnimation.jpg) 0 0;
     animation: TerminalAnimation 7s steps(7) infinite;
 }
 
-.Exit
-{
-    background: url(../img/Exit.jpg) 0 0;
-    z-index: 1;
-}
 
+
+@keyframes EatTile {
+    100$ { background-position: -384px;}
+}
 
 @keyframes MurphyMovingLeft {
     100% { background-position: -192px;}
