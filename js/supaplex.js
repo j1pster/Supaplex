@@ -194,6 +194,61 @@ var Tile = {
             "bottomRight": Supaplex.level[this.locationY + 1][this.locationX + 1]
         }
         return allNeighbours;
+    },
+    explode: function(currentExplosions) {
+        var currentExplosions = currentExplosions || [];
+        this.classes = "Explosion tile";
+        Supaplex.tilesToUpdate.push(this);
+        var param = this;
+        this.$elem.addEventListener("animationend", function() {
+            param.removeExplosion(param)
+        }, false);
+        var neighbours = this.getAllNeighbours();
+        Object.keys(neighbours).forEach(function(key) {
+            var currentElement = neighbours[key];
+            if (currentElement.exploding) {
+                if (!currentExplosions.contains(currentElement)){
+                    currentExplosions.push(currentElement);
+                    currentElement.classes = "Explosion tile";
+                    Supaplex.tilesToUpdate.push(currentElement);
+                    currentElement.$elem.addEventListener("animationend", function() {
+                        currentElement.removeExplosion(currentElement)
+                    }, false);
+                    if(currentElement.bomb) {
+                        setTimeout(currentElement.explode, Supaplex.ANIMATION_TIMINGS.explosion, currentExplosions);
+                    }
+                }
+            }
+        });
+        /*var Exploding = function () {
+            Supaplex.Explosions.push(elem);
+            var element = document.getElementById(elem.ID);
+            element.className = "Explosion";
+            element.addEventListener("animationend", Supaplex.removeExplosions, false);
+            var Explosions = Supaplex.get8Squares(elem);
+            for (var i = 0; i < Explosions.length; i++) {
+                Supaplex.ExplosionCount += 1;
+                if(Explosions[i].exploding) {
+                    if (!Supaplex.Explosions.contains(Explosions[i])){
+                        Supaplex.Explosions.push(Explosions[i]);
+                        element = document.getElementById(Explosions[i].ID);
+                        element.className = "Explosion tile";
+                        element.tile = Explosions[i];
+                        element.addEventListener("animationend", Supaplex.removeExplosions, false);
+                        if (Explosions[i].bomb && Explosions[i] !== elem) {
+                            Supaplex.Explode(Explosions[i], Supaplex.ANIMATION_TIMINGS.explosion);
+                        }
+                    }
+                }
+            }
+        };
+        setTimeout(Exploding, delay);*/
+    },
+    removeExplosion: function(e, elem) {
+        console.log(this);
+        this.classes = "empty tile";
+        this.type = "empty";
+        Supaplex.tilesToUpdate.push(this);
     }
 
 }
@@ -461,7 +516,7 @@ Supaplex.keyBoard.spaceDown = false;
 Supaplex.onKeyDown = function(event) {
     switch(event.keyCode) {
         case Supaplex.keyBoard.getValue("escape"):
-            Supaplex.Explode(Supaplex.level[Supaplex.Murphy.locationY][Supaplex.Murphy.locationX], 0);
+            Supaplex.Murphy.explode();
             break;
         //
         case Supaplex.keyBoard.getValue("space"):
@@ -576,7 +631,8 @@ Supaplex.handleVisibilityChange = function () {
 // Make an element explode.
 // elem: Tile, the element that needs to explode
 // delay: int, the delay in milliseconds.
-Supaplex.Explode = function(elem, delay){
+Supaplex.Explode = function(elem, delay, currentExplosions){
+    currentExplosions = currentExplosions || [];
     var Exploding = function () {
         Supaplex.Explosions.push(elem);
         var element = document.getElementById(elem.ID);
@@ -607,7 +663,7 @@ Supaplex.removeExplosions = function (e) {
     element = Supaplex.level[tileId[0]][tileId[1]];
     element.classes = "empty tile";
     element.type = "empty";
-    e.srcElement.className = "empty tile";
+    Supaplex.tilesToUpdate.push(element);
 }
 
 /*********************************************************************************************************************/
@@ -633,7 +689,7 @@ Supaplex.logic = function() {
             else if(neighbour.type == "Terminal") {
                 if(Supaplex.YellowFloppies.length != 0) {
                     for(var i = Supaplex.YellowFloppies.length - 1; i >= 0; i--) {
-                        Supaplex.Explode(Supaplex.YellowFloppies[i]);
+                        Supaplex.YellowFloppies[i].explode();
                         Supaplex.YellowFloppies.pop();
                     }
                 }
@@ -712,6 +768,7 @@ Supaplex.UnPauseTheGame = function () {
 
 Supaplex.draw = function() {
     for(var i = Supaplex.tilesToUpdate.length - 1; i >= 0; i--) {
+        console.log(Supaplex.tilesToUpdate[i]);
         Supaplex.tilesToUpdate[i].measure();
     }
     for(var i = Supaplex.tilesToUpdate.length - 1; i >= 0; i--) {
