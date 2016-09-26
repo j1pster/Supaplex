@@ -116,6 +116,22 @@ body, html {
     z-index: 1;
 }
 
+.MurphyEatingdown {
+    background-image: url(../img/MurphyEatdown.jpg);
+}
+
+.MurphyEatingleft {
+    background-image: url(../img/MurphyEatleft.jpg);
+}
+
+.MurphyEatingright {
+    background-image: url(../img/MurphyEatright.jpg);
+}
+
+.MurphyEatingup {
+    background-image: url(../img/MurphyEatup.jpg);
+}
+
 .PortDown {
     background-image: url(../img/PortDown.jpg);
 }
@@ -166,13 +182,24 @@ body, html {
     animation: Explode .45s steps(6);
 }
 
-.EatTile {
+.Eatbase {
     width: 64px;
     height: 64px;
     position: absolute;
     display: block;
     background: url(../img/EatTileAnimation.jpg) 0 0;
-    animation: EatTile .5s steps(6);
+    animation: EatTile .25s steps(6);
+}
+
+.Eatinfotron {
+    background: url(../img/EatInfotronAnimation.jpg) 0 0;
+    animation: EatInfotron .25s steps(7);
+}
+
+.infotronFallingLeft {
+    background: url(../img/InfotronFallingLeft.jpg) 0 0;
+    animation: InfotronFallingSides .2s steps(7);
+    z-index: 1;
 }
 
 .MurphyMovingLeft {
@@ -187,6 +214,18 @@ body, html {
     z-index: 1;
 }
 
+.zonkFallingLeft {
+    background: url(../img/ZonkFallingLeft.jpg) 0 0;
+    animation: ZonkFallingSides .1s steps(3) 2;
+    z-index: 1;
+}
+
+.zonkFallingRight {
+    background: url(../img/ZonkFallingRight.jpg) 0 0;
+    animation: ZonkFallingSides .1s steps(3) 2;
+    z-index: 1;
+}
+
 .Terminal {
     background: url(../img/TerminalAnimation.jpg) 0 0;
     animation: TerminalAnimation 7s steps(7) infinite;
@@ -195,24 +234,37 @@ body, html {
 
 
 @keyframes EatTile {
-    100$ { background-position: -384px;}
+    100% { background-position: -384px; }
 }
 
-@keyframes MurphyMovingLeft {
-    100% { background-position: -192px;}
-}
-
-@keyframes MurphyMovingRight {
-    100% { background-position: -192px;}
+@keyframes EatInfotron {
+    100% { background-position: -448px; }
 }
 
 @keyframes Explode {
     100% { background-position: -384px; }
 }
 
+@keyframes MurphyMovingLeft {
+    100% { background-position: -192px; }
+}
+
+@keyframes MurphyMovingRight {
+    100% { background-position: -192px; }
+}
+
 @keyframes TerminalAnimation {
     100% { background-position: -448px; }
 }
+
+@keyframes ZonkFallingSides {
+    100% { background-position: -192px; }
+}
+
+@keyframes InfotronFallingSides {
+    100% { background-position: -448px; }
+}
+
 
 @-webkit-keyframes Explode {
     100% { background-position: -384px; }
