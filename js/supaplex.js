@@ -192,6 +192,8 @@ var Tile = {
             if(!this.beingPushed){
                 if(!this.isPushing) {
                     this.changeLocation(neighbour);
+                } else {
+                    this.pushChangelocation(neighbour, direction)
                 }
             }
             this.position.x = (Supaplex.TILESIZE / 2) + (this.locationX - 1) * Supaplex.TILESIZE;
@@ -208,7 +210,7 @@ var Tile = {
         Supaplex.level[neighbour.locationY][neighbour.locationX] = this;
         this.locationX = neighbour.locationX;
         this.locationY = neighbour.locationY;
-        Supaplex.level[originalY][originalX] = neighbour
+        Supaplex.level[originalY][originalX] = neighbour;
         neighbour.type = "empty";
         neighbour.classes = "empty tile";
         neighbour.locationX = originalX;
@@ -218,8 +220,19 @@ var Tile = {
         Supaplex.tilesToUpdate.push(neighbour);
         neighbour.reserved = false;
     },
-    pushChangelocation() {
-        Supaplex.level[this.locationY + (1 * Supaplex.DIRECTIONS[this.direction].y)][this.locationX + (1 * Supaplex.DIRECTIONS[this.direction].x)] = this;
+    pushChangelocation(neighbour, direction) {
+        var nextNeighbour = neighbour.getNeighbour(direction),
+            originalX1 = this.locationX,
+            originalY1 = this.locationY,
+            originalX2 = neighbour.locationX,
+            originalY2 = neighbour.locationY;
+        Supaplex.level[neighbour.locationY][neighbour.locationX] = this;
+        Supaplex.level[nextNeighbour.locationY][nextNeighbour.locationX] = neighbour;
+        Supaplex.level[this.locationY][this.locationX] = nextNeighbour;
+        neighbour.locationX = nextNeighbour.locationX;
+        neighbour.locationY = nextNeighbour.locationY;
+
+
     }
     // Returns one neighbour Tile in the specified direction
     // direction - String: Up, down, left or right. Corresponds to Supaplex.DIRECTIONS
@@ -255,7 +268,8 @@ Supaplex.giveMurphySuperpowers = function() {
     Supaplex.Murphy.pushing = function(neighbour) {
         neighbour.beingPushed = true;
         neighbour.animationTiming = Supaplex.ANIMATION_TIMINGS.falling;
-        neighbour.move(neighbour.animationTiming, neighbour.direction, )
+        neighbour.animationClass = "ZonkFalling" + neighbour.direction;
+        neighbour.move(neighbour.animationTiming, neighbour.direction, neighbour.animationClass);
     }
 }
 
