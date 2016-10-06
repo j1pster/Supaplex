@@ -132,6 +132,14 @@ body, html {
     background-image: url(../img/MurphyEatup.jpg);
 }
 
+.MurphyPushingleft {
+    background-image: url(../img/MurphyPushingLeft.jpg);
+}
+
+.MurphyPushingright {
+    background-image: url(../img/MurphyPushingRight.jpg);
+}
+
 .PortDown {
     background-image: url(../img/PortDown.jpg);
 }
@@ -214,13 +222,13 @@ body, html {
     z-index: 1;
 }
 
-.zonkFallingLeft {
+.zonkFallingleft {
     background: url(../img/ZonkFallingLeft.jpg) 0 0;
     animation: ZonkFallingSides .1s steps(3) 2;
     z-index: 1;
 }
 
-.zonkFallingRight {
+.zonkFallingright {
     background: url(../img/ZonkFallingRight.jpg) 0 0;
     animation: ZonkFallingSides .1s steps(3) 2;
     z-index: 1;
