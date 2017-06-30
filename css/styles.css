@@ -6,19 +6,20 @@ body, html {
 }
 
 #page {
-    white-space: nowrap;
+    /*white-space: nowrap;*/
     background-color: #000000;
     overflow:hidden;
 }
 
-#level {
+#level{
     position: absolute;
     left:0px;
     top:0px;
-    width:3776px;
-    height:1472px;
+    width:100%;
+    height:100%;
     background: black;
-    z-index: -999
+    z-index: -999;
+    will-change: transform;
 }
 /*---------------Basic Tiles & Walls---------------- */
 .tile {
@@ -29,6 +30,46 @@ body, html {
     position: absolute;
 }
 
+.three {
+    display: block;
+    width: 192px;
+    height: 64px;
+    overflow:hidden;
+    position: absolute;
+}
+
+.five {
+    display: block;
+    width: 256px;
+    height: 64px;
+    overflow:hidden;
+    position: absolute;
+}
+
+.seven {
+    display: block;
+    width: 448px;
+    height: 64px;
+    overflow:hidden;
+    position: absolute;
+}
+
+.eight {
+    display: block;
+    width: 512px;
+    height: 64px;
+    overflow:hidden;
+    position: absolute;
+}
+
+.twelve {
+    display: block;
+    width: 768px;
+    height: 64px;
+    overflow:hidden;
+    position: absolute;
+}
+/*
 .empty {
     background-color: black;
     z-index: -1;
@@ -87,6 +128,7 @@ body, html {
 
 /*----------------------------Other Tiles-------------------------- */
 /*---------------Floppies, RAM, zonks, Murphy, etc.---------------- */
+/*
 .Exit {
     background: url(../img/Exit.jpg) 0 0;
     z-index: 1;
@@ -222,13 +264,13 @@ body, html {
     z-index: 1;
 }
 
-.zonkFallingleft {
+.zonkFallingLeft {
     background: url(../img/ZonkFallingLeft.jpg) 0 0;
     animation: ZonkFallingSides .1s steps(3) 2;
     z-index: 1;
 }
 
-.zonkFallingright {
+.zonkFallingRight {
     background: url(../img/ZonkFallingRight.jpg) 0 0;
     animation: ZonkFallingSides .1s steps(3) 2;
     z-index: 1;
@@ -288,4 +330,4 @@ body, html {
 
 @-o-keyframes Explode {
     100% { background-position: -384px; }
-}
+}*/
