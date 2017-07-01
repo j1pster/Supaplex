@@ -107,7 +107,7 @@ window.onload = function(){
 /************************************************** -- CONSTANTS -- **************************************************/
 /*********************************************************************************************************************/
 
-Supaplex.LEVELURL = "../open.php"; //php script to read in the original Supaplex level file (levels.dat)
+Supaplex.LEVELURL = "open.php"; //php script to read in the original Supaplex level file (levels.dat)
 Supaplex.TILESIZE = 64; // As for now, all tiles are 64 x 64 pixels.
 
 // Object used for movement calculations.
@@ -216,7 +216,6 @@ var Tile = {
         } else {
             this.visible = false;
         }
-        return;
     },
     // moves a tile
     // time - Number: the time a complete movement should take in milliseconds
@@ -307,7 +306,7 @@ var Tile = {
     },
     // Returns the neighbouring Tiles in all directions, including diagonally
     getAllNeighbours: function() {
-        var allNeighbours = {
+        return {
             "topLeft": Supaplex.level[this.locationY - 1][this.locationX - 1],
             "top": Supaplex.level[this.locationY-1][this.locationX],
             "topRight": Supaplex.level[this.locationY-1][this.locationX + 1],
@@ -317,11 +316,10 @@ var Tile = {
             "bottom": Supaplex.level[this.locationY + 1][this.locationX],
             "bottomRight": Supaplex.level[this.locationY + 1][this.locationX + 1]
         };
-        return allNeighbours;
     },
     eatingEnd: function() {
         Supaplex.Murphy.eating = false;
-        this.type = "Empty"
+        this.type = "Empty";
         this.sprite = Supaplex.SPRITES.Empty;
     },
     fallingEnd: function() {
@@ -383,13 +381,13 @@ Supaplex.giveMurphySuperpowers = function() {
     };
 
     Supaplex.Murphy.MurphyMoveEnd = function() {
-        return;
+
     }
 
     Supaplex.Murphy.MurphyEnd = function() {
         Supaplex.Murphy.sprite = Supaplex.SPRITES.Empty;
         console.log("you won the game!");
-    }
+    };
 
     Supaplex.Murphy.nextDirection = "";
 };
@@ -559,13 +557,11 @@ Supaplex.getNeighbour = function (posY, posX, direction){
 //elem - object: The tile that should explode
 //currentExplosions - array: An array of objects that have already exploded
 Supaplex.explode = function(elem, currentExplosions) {
-    var currentExplosions = currentExplosions || [];
+    currentExplosions = currentExplosions || [];
     elem.sprite = Supaplex.SPRITES.Explosion;
     elem.type = "Explosion";
     elem.currentSpriteTile = 0;
     elem.bomb = false;
-    // Supaplex.tilesToUpdate.push(elem);
-    // elem.$elem.addEventListener("animationend", Supaplex.animationEndCallback(elem, "empty"), false);
     var neighbours = elem.getAllNeighbours();
     Object.keys(neighbours).forEach(function(key) {
         var currentElement = neighbours[key];
