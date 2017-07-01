@@ -7,6 +7,8 @@ var Supaplex = {};
 
 Supaplex.init = function () {
     Supaplex.level = []; //Contains every tile in a 2-dimensional array
+    Supaplex.HE = 24;
+    Supaplex.WI = 60;
     Supaplex.tilesToUpdate = [];
     Supaplex.Scissors = []; // Dunno if i'm going to use this yet
     Supaplex.Murphy = {}; // Our hero!
@@ -413,20 +415,39 @@ Array.prototype.contains = function(obj){
 // lvl: int, the number of the level which you want to load.
 Supaplex.getJson = function(url, lvl, callback) {
     var xobj = new XMLHttpRequest();
-    var params = "?level=" + lvl;
-    var data;
-    xobj.open('GET', url + params, true);
+    xobj.open('GET', "files/LEVELS.DAT", true)
+    xobj.responseType = "arraybuffer";
 
-    xobj.onreadystatechange = function(){
-        if(xobj.readyState == 4 && xobj.status == "200") {
-            if (xobj.responseText !== undefined) {
-                data = JSON.parse(xobj.responseText);
-                callback(data);
-            }
-        }
+    xobj.onload = function(e) {
+        var responseArray = new Uint8Array(this.response);
+        var data = Supaplex.getLevelData(responseArray, lvl);
+        console.log(data);
+        callback(data);
     };
-    xobj.send();
+    xobj.send(null);
 };
+
+Supaplex.getLevelData = function(data, lvl) {
+    var levelData = {
+        grid: [],
+        info: []
+    };
+    var maxI = i + 1536;
+    for(var i = 0; i < Supaplex.HE; i++) {
+        var row = [];
+        for(var j = 0; j < Supaplex.WI; j++) {
+            var currentIndex = ((lvl - 1) * 1536) + (i * Supaplex.WI) + j;
+            row.push(data[currentIndex]);
+        }
+        levelData.grid.push(row);
+    }
+    for(var k = 0; k < 96; k++) {
+        var currentIndex2 = ((lvl - 1) * 1536) + 1440 + k;
+        levelData.info.push(data[currentIndex2]);
+    }
+
+    return levelData;
+}
 
 // Returns a Tile object based on the level data for that tile.
 // data: string, corresponds to a hexadecimal number
@@ -441,7 +462,7 @@ Supaplex.getTile = function(data, i, j){
         positionX -= 32;
     }
     //Tile (ID, locationX, locationY, type, exploding, bomb, movable, active, position.x, position.y);
-    switch (data) {
+    switch (data.toString(16)) {
         case "0":
             tile.init(i + "." + j, j, i, "Empty", true, false, false, true, positionX, positionY, "Empty");
             break;
