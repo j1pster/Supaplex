@@ -454,7 +454,7 @@ Supaplex.getLevelData = function(data, lvl) {
 // i: int, the Y position of the current tile
 // j: int, the X position of the current tile
 Supaplex.getTile = function(data, i, j){
-    var tile = Object.create(Tile), positionY = i * 64, positionX = j * 64;
+    var tile = Object.create(Tile), positionY = i * Supaplex.TILESIZE, positionX = j * Supaplex.TILESIZE;
     if(i > 0) {
         positionY -= 32;
     }
@@ -834,10 +834,10 @@ Supaplex.logic = function() {
     }
     //We'll iterate over evey Tile in the level, and process it accordingly. Most tiles will just get ignored.
     //I should really move this into seperate functions.
-    var i = Supaplex.level.length - 1;
-    for (i; i >= 0; i--) {
-        var j = Supaplex.level[i].length - 1;
-        for (j; j >=0; j--) {
+    var length = Supaplex.level.length;
+    for (var i = 0; i < length; i++) {
+        var length2 = Supaplex.level[i].length;
+        for (var j = 0; j < length2; j++) {
             var currentTile = Supaplex.level[i][j];
             if (currentTile.type == "Zonk" || currentTile.type == "Infotron") {
                 var aboveZonk = Supaplex.getNeighbour(currentTile.locationY, currentTile.locationX, "Up");
@@ -854,9 +854,8 @@ Supaplex.logic = function() {
                     else if ((allNeighbours.bottom.type == "Zonk" || allNeighbours.bottom.type == "Infotron" || allNeighbours.bottom.type == "RAM" ||
                     allNeighbours.bottom.type == "RAMTop" || allNeighbours.bottom.type == "RAMLeft" || allNeighbours.bottom.type == "RAMRight" ||
                     allNeighbours.bottom.type == "RAMBottom" || allNeighbours.bottom.type == "RAMRegular") && allNeighbours.bottom.moving == false) {
-                        if (allNeighbours.bottomLeft.type == "Empty" && !allNeighbours.bottomLeft.reserved && !allNeighbours.left.reserved && allNeighbours.left.type == "Empty") {
+                        if (allNeighbours.bottomLeft.type == "Empty" && !allNeighbours.bottomLeft.reserved && !allNeighbours.left.reserved && (allNeighbours.left.type == "Empty" && allNeighbours.topLeft.type !== "Zonk")) {
                             currentTile.move(Supaplex.ANIMATION_TIMINGS.falling, "Left", currentTile.type + "FallingLeft", "changeLocation");
-                            //currentTile.$elem.addEventListener("animationend", Supaplex.animationEndCallback(currentTile, currentTile.type), false);
                             allNeighbours.bottomLeft.reserved = true;
                             allNeighbours.bottomLeft.reservedBy = currentTile;
                             allNeighbours.left.reserved = true;
@@ -865,9 +864,8 @@ Supaplex.logic = function() {
                             currentTile.animationClass = "ZonkFallingLeft";
                             currentTile.falling = true;
                         }
-                        else if (allNeighbours.bottomRight.type == "Empty" && !allNeighbours.bottomRight.reserved && !allNeighbours.right.reserved && allNeighbours.right.type == "Empty") {
+                        else if (allNeighbours.bottomRight.type == "Empty" && !allNeighbours.bottomRight.reserved && !allNeighbours.right.reserved && (allNeighbours.right.type == "Empty" && allNeighbours.topRight.type !== "Zonk")) {
                             currentTile.move(Supaplex.ANIMATION_TIMINGS.falling, "Right", currentTile.type + "FallingRight", "changeLocation");
-                            //currentTile.$elem.addEventListener("animationend", Supaplex.animationEndCallback(currentTile, currentTile.type), false);
                             allNeighbours.bottomRight.reserved = true;
                             allNeighbours.bottomRight.reservedBy = currentTile;
                             allNeighbours.right.reserved = true;
@@ -965,15 +963,16 @@ Supaplex.draw = function() {
 
 Supaplex.loop = function() {
     Supaplex.fpsCounter++;
-    Supaplex.fpsTimer += (performance.now() - Supaplex.lastLogicUpdate);
-    if(Supaplex.fpsTimer > 1000) {
-        Supaplex.FPS = Supaplex.fpsCounter;
-        if(Supaplex.FPS < 60) {
-            Supaplex.FPS = 60;
-        }
-        Supaplex.fpsCounter = 0;
-        Supaplex.fpsTimer = 0;
-    }
+    Supaplex.fpsTimer = (performance.now() - Supaplex.lastLogicUpdate);
+    Supaplex.FPS = 1000 / Supaplex.fpsTimer;
+    // if(Supaplex.fpsTimer > 1000) {
+    //     Supaplex.FPS = Supaplex.fpsCounter;
+    //     if(Supaplex.FPS < 60) {
+    //         Supaplex.FPS = 60;
+    //     }
+    //     Supaplex.fpsCounter = 0;
+    //     Supaplex.fpsTimer = 0;
+    // }
     Supaplex.logic();
     Supaplex.draw();
     Supaplex.lastLogicUpdate = performance.now();
