@@ -713,6 +713,7 @@ Supaplex.onKeyDown = function(event) {
     switch(event.keyCode) {
         case Supaplex.keyBoard.getValue("escape"):
             Supaplex.explode(Supaplex.Murphy);
+            document.removeEventListener('keydown', Supaplex.onKeyDown);
             break;
 
         case Supaplex.keyBoard.getValue("p"):
