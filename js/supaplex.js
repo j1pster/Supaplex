@@ -93,7 +93,7 @@ Supaplex.init = function () {
         ZonkPushedRight: {source: document.getElementById("ZonkFallingLeft"), duration: Supaplex.ANIMATION_TIMINGS.pushing, tiles: 4, callBack: "fallingEnd"},
         ZonkPushedLeft: {source: document.getElementById("ZonkFallingRight"), duration: Supaplex.ANIMATION_TIMINGS.pushing, tiles: 4, callBack: "fallingEnd"}
     };
-    Supaplex.loadLevel(Supaplex.LEVELURL, 3);
+    Supaplex.loadLevel(Supaplex.LEVELURL, 4);
 }
 
 // let's start this thing.
