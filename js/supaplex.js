@@ -624,7 +624,7 @@ Supaplex.buildLevel = function (data) {
         Supaplex.level.push(row);
     }
     var info = data.info;
-    Supaplex.levelInfo.InfotronsNeeded = parseInt(info[30], 16);
+    Supaplex.levelInfo.InfotronsNeeded = parseInt(info[30], 10);
     Supaplex.Murphy = Supaplex.level[Supaplex.MurphyLocationX][Supaplex.MurphyLocationY];
     Supaplex.giveMurphySuperpowers();
     Supaplex.Murphy.directionFacing = "Left";
