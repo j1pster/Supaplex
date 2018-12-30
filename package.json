@@ -1,0 +1,25 @@
+{
+  "name": "supaplex",
+  "version": "1.0.0",
+  "description": "",
+  "main": "supaplex.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/J1pster/Supaplex.git"
+  },
+  "author": "Jip Leijdekkers",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/J1pster/Supaplex/issues"
+  },
+  "homepage": "https://github.com/J1pster/Supaplex#readme",
+  "devDependencies": {
+    "gulp": "^4.0.0"
+  },
+  "dependencies": {
+    "gulp-concat": "^2.6.1"
+  }
+}
