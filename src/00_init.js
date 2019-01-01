@@ -25,6 +25,7 @@ Supaplex.DIRECTIONS = {
 // These timings are based on timings in the original Supaplex game but may be a bit off.
 Supaplex.ANIMATION_TIMINGS = {
     regularMove: 150,
+    port: 50,
     eating: 200,
     falling: 200,
     explosion: 500,
@@ -76,6 +77,7 @@ Supaplex.init = function () {
     Supaplex.offsetTop = 0;
     Supaplex.SPRITES = {
         Base: {source: document.getElementById("Base"), tiles: 1},
+        BugAnimation: {source: document.getElementById("BugAnimation"), tiles: 5, duration: 500, callBack: "finishBug"},
         EatInfotronAnimation: {source: document.getElementById("EatInfotronAnimation"), duration: 250, tiles: 8, callBack: "eatingEnd"},
         EatBaseAnimation: {source: document.getElementById("EatTileAnimation"), tiles: 7, duration: 250, callBack: "eatingEnd"},
         Empty: {source: document.getElementById("Empty"), tiles: 1},
@@ -83,7 +85,9 @@ Supaplex.init = function () {
         Explosion: {source: document.getElementById("Explosion"), tiles: 7, duration: Supaplex.ANIMATION_TIMINGS.explosion, callBack: "explosionEnd"},
         FloppyOrange: {source: document.getElementById("FloppyOrange"), tiles: 1},
         FloppyRed: {source: document.getElementById("FloppyRed"), tiles: 1},
-        FloppyYellow: {source: document.getElementById("FloppyYellow"), tiles: 1},
+        FloppyYellow: {source: document.getElementById("FloppyYellow"), tiles: 1, duration: Supaplex.ANIMATION_TIMINGS.pushing, tiles: 1, callBack: "fallingEnd"},
+        Hardware4: {source: document.getElementById("Hardware4"), tiles: 1},
+        Hardware5: {source: document.getElementById("Hardware5"), tiles: 1},
         Infotron: {source: document.getElementById("Infotron"), tiles: 1},
         InfotronFallingLeft: {source: document.getElementById("InfotronFallingLeft"), duration: Supaplex.ANIMATION_TIMINGS.falling, tiles: 8, callBack: "fallingEnd"},
         InfotronFallingRight: {source: document.getElementById("InfotronFallingRight"), duration: Supaplex.ANIMATION_TIMINGS.falling, tiles: 8, callBack: "fallingEnd"},
@@ -126,7 +130,7 @@ Supaplex.init = function () {
         ZonkPushedLeft: {source: document.getElementById("ZonkFallingRight"), duration: Supaplex.ANIMATION_TIMINGS.pushing, tiles: 4, callBack: "fallingEnd"}
     };
 
-    Supaplex.loadLevel(Supaplex.LEVELURL, 1);
+    Supaplex.loadLevel(Supaplex.LEVELURL, 9);
 }
 
 // let's start this thing.

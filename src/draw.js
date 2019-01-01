@@ -25,6 +25,7 @@ Supaplex.draw = function() {
     Supaplex.levelCtx.clearRect(0, 0, Supaplex.levelElem.width, Supaplex.levelElem.height);
     //Supaplex.copyCtx.clearRect(0, 0, Supaplex.levelCopy.width, Supaplex.levelCopy.height);
     var xLength = Supaplex.level.length;
+    if(Supaplex.Murphy.drawFirst) Supaplex.Murphy.draw();
     //first draw all elements that aren't moving.
     for(var x = 0; x < xLength; x++) {
         var yLength = Supaplex.level[x].length;
@@ -40,6 +41,7 @@ Supaplex.draw = function() {
         for(var y2 = 0; y2 < yLength; y2++) {
             var element2 = Supaplex.level[x2][y2];
             if(element2.moving && element2.type != "Empty") {
+                if(element2.type == "Murphy" && Supaplex.Murphy.drawFirst) continue;
                 element2.draw();
             }
         }

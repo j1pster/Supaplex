@@ -18,7 +18,6 @@ Supaplex.getJson = function(url, lvl, callback) {
     xobj.onload = function(e) {
         var responseArray = new Uint8Array(this.response);
         var data = Supaplex.getLevelData(responseArray, lvl);
-        console.log(data);
         callback(data);
     };
     xobj.send(null);
@@ -42,7 +41,6 @@ Supaplex.getLevelData = function(data, lvl) {
         var currentIndex2 = ((lvl - 1) * 1536) + 1440 + k;
         levelData.info.push(data[currentIndex2]);
     }
-
     return levelData;
 }
 
@@ -60,12 +58,23 @@ Supaplex.buildLevel = function (data) {
     }
     var info = data.info;
     Supaplex.levelInfo.InfotronsNeeded = info[30];
+    Supaplex.levelInfo.gravity = Boolean(info[4]);
+    Supaplex.levelInfo.title = Supaplex.getTitle(info);
     Supaplex.Murphy = Supaplex.level[Supaplex.MurphyLocationX][Supaplex.MurphyLocationY];
     Supaplex.giveMurphySuperpowers();
+    Supaplex.Murphy.direction = "Left";
     Supaplex.Murphy.directionFacing = "Left";
     Supaplex.Murphy.isPushing = false;
     Supaplex.loop();
     Supaplex.logic();
+}
+
+Supaplex.getTitle = function (data) {
+    var title = "";
+    for(var i = 5; i < 28; i++) {
+        title += String.fromCharCode(data[i]);
+    }
+    return title;
 }
 
 // Returns a Tile object based on the level data for that tile.
@@ -75,6 +84,7 @@ Supaplex.buildLevel = function (data) {
 Supaplex.getTile = function(data, i, j){
     var tile = Object.create(Tile)
     //Tile (ID, locationX, locationY, type, exploding, bomb, movable, active, position.x, position.y);
+    if(i == 21 && j == 3) console.log(data.toString(16));
     switch (data.toString(16)) {
         case "0":
             tile.init(j, i, "Empty", true, false, false, true, "Empty");
@@ -130,15 +140,15 @@ Supaplex.getTile = function(data, i, j){
             tile.init(j, i, "PortRight", true, false, false, true, "PortRight");
             break;
 
-        case "0A":
+        case "a":
             tile.init(j, i, "PortDown", true, false, false, true, "PortDown");
             break;
 
-        case "0B":
+        case "b":
             tile.init(j, i, "PortLeft", true, false, false, true, "PortLeft");
             break;
 
-        case "0C":
+        case "c":
             tile.init(j, i, "PortUp", true, false, false, true, "PortUp");
             break;
 
@@ -159,11 +169,24 @@ Supaplex.getTile = function(data, i, j){
             tile.init(j, i, "FloppyRed", true, false, false, true, "FloppyRed");
             break;
 
+        case "19":
+            tile.init(j, i, "Bug", true, false, false, true, "BugAnimation");
+            tile.bugActive = true;
+            tile.bugTimer = 0;
+            tile.timeSinceLastBug = 0;
+            break;
+
         case "1a": //RAM horizontal, left part
             tile.init(j, i, "RAMLeft", true, false, false, true, "RAMLeft");
             break;
         case "1b": //RAM horizontal, right part
             tile.init(j, i, "RAMRight", true, false, false, true, "RAMRight");
+            break;
+        case "1f":
+            tile.init(j, i, "Hardware", false, false, false, true, "Hardware4");
+            break;
+        case "20":
+            tile.init(j, i, "Hardware", false, false, false, true, "Hardware5");
             break;
 
         case "26": //RAM vertical, top part

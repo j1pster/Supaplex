@@ -115,13 +115,13 @@ var Tile = {
     checkForLastMove: function(direction, deze) {
         if(Math.round(deze.amountMoved) >= Supaplex.TILESIZE) {
             var neighbour = Supaplex.getNeighbour(deze.locationY, deze.locationX, direction);
-            deze[deze.moveEndCallback](neighbour, direction);
             //deze.position.x = (Supaplex.TILESIZE / 2) + (deze.locationX - 1) * Supaplex.TILESIZE;
             //deze.position.y = (Supaplex.TILESIZE / 2) + (deze.locationY - 1) * Supaplex.TILESIZE;
             deze.firstmove = false;
             deze.amountMoved = 0;
             deze.moving = false;
             neighbour.reserved = false;
+            deze[deze.moveEndCallback](neighbour, direction);
             return true;
         }
         return false;
@@ -179,14 +179,14 @@ var Tile = {
     // Returns the neighbouring Tiles in all directions, including diagonally
     getAllNeighbours: function() {
         return {
-            "topLeft": Supaplex.level[this.locationY - 1][this.locationX - 1],
-            "top": Supaplex.level[this.locationY-1][this.locationX],
-            "topRight": Supaplex.level[this.locationY-1][this.locationX + 1],
-            "left": Supaplex.level[this.locationY][this.locationX - 1],
-            "right": Supaplex.level[this.locationY][this.locationX + 1],
-            "bottomLeft": Supaplex.level[this.locationY + 1][this.locationX - 1],
-            "bottom": Supaplex.level[this.locationY + 1][this.locationX],
-            "bottomRight": Supaplex.level[this.locationY + 1][this.locationX + 1]
+            "TopLeft": Supaplex.level[this.locationY - 1][this.locationX - 1],
+            "Top": Supaplex.level[this.locationY-1][this.locationX],
+            "TopRight": Supaplex.level[this.locationY-1][this.locationX + 1],
+            "Left": Supaplex.level[this.locationY][this.locationX - 1],
+            "Right": Supaplex.level[this.locationY][this.locationX + 1],
+            "BottomLeft": Supaplex.level[this.locationY + 1][this.locationX - 1],
+            "Bottom": Supaplex.level[this.locationY + 1][this.locationX],
+            "BottomRight": Supaplex.level[this.locationY + 1][this.locationX + 1]
         };
     },
     eatingEnd: function() {
@@ -205,6 +205,12 @@ var Tile = {
             this.bomb = false;
         }
     },
+    finishBug: function() {
+        this.sprite = Supaplex.SPRITES.Base;
+        this.bugActive = false;
+        this.bugTimer = 3000 + Math.random() * 2000;
+        this.timeSinceLastBug = 0;
+    },
     wait: function(time, callback, args) {
         if(this.startTime == 0) {
             this.waiting = true;
@@ -221,7 +227,7 @@ var Tile = {
     },
     waitBeforePushEnd: function() {
         var callBack = "pushChangelocation";
-        if(this.type == "zonk") {
+        if(this.type == "Zonk") {
             this.animationClass = "ZonkPushed" + this.direction
             this.sprite = Supaplex.SPRITES[this.animationClass];
             callBack = "fallingEnd";

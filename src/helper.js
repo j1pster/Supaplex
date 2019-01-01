@@ -20,8 +20,7 @@ Supaplex.getNeighbour = function (posY, posX, direction){
 
 //elem - object: The tile that should explode
 //currentExplosions - array: An array of objects that have already exploded
-Supaplex.explode = function(elem, currentExplosions) {
-    currentExplosions = currentExplosions || [];
+Supaplex.explode = function(elem) {
     elem.sprite = Supaplex.SPRITES.Explosion;
     elem.type = "Explosion";
     elem.currentSpriteTile = 0;
@@ -30,13 +29,12 @@ Supaplex.explode = function(elem, currentExplosions) {
     for(var key in neighbours) {
         var currentElement = neighbours[key];
         if (currentElement.exploding) {
-            currentExplosions.push(currentElement);
             currentElement.sprite = Supaplex.SPRITES.Explosion;
             currentElement.type = "Explosion";
             currentElement.currentSpriteTile = 0;
             if(currentElement.bomb) {
                 currentElement.bomb = false;
-                setTimeout(Supaplex.explode, 250, currentElement, currentExplosions);
+                currentElement.wait(250, Supaplex.explode, [currentElement]);
             }
         }
     }

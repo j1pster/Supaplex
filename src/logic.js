@@ -5,12 +5,27 @@ Supaplex.logic = function() {
 
     //We'll iterate over evey Tile in the level, and process it accordingly. Most tiles will just get ignored.
     //I should really move this into seperate functions.
-    for (var i = 0; i < Supaplex.HE; i++) {
-        for (var j = 0; j < Supaplex.WI; j++) {
+    var l1 = Supaplex.level.length;
+    for (var i = 0; i < l1; i++) {
+        var l2 = Supaplex.level[i].length;
+        for (var j = 0; j < l2; j++) {
             var currentTile = Supaplex.level[i][j];
+            if(currentTile.waiting) {
+                currentTile.wait(currentTile.waitingTime, currentTile.waitingCallback, currentTile.waitingArgs);
+                continue;
+            }
             switch(currentTile.type) {
                 case "Zonk": case "Infotron":
                     Supaplex.processZonkOrInfotron(currentTile);
+                    break;
+                case "FloppyOrange":
+                    Supaplex.processOrangeFloppy(currentTile);
+                    break;
+                case "FloppyYellow":
+                    Supaplex.processYellowFloppy(currentTile);
+                    break;
+                case "Bug":
+                    Supaplex.processBug(currentTile);
                     break;
             }
         }
@@ -24,6 +39,11 @@ Supaplex.processMurphy = function() {
     if(!Supaplex.Murphy.moving && !Supaplex.Murphy.waiting) {
         Supaplex.Murphy.direction = Supaplex.Murphy.nextDirection;
     }
+    if(Supaplex.levelInfo.gravity && !Supaplex.Murphy.moving) {
+        if(Supaplex.checkIfMurphyShouldFall()) {
+            Supaplex.makeTileFall(Supaplex.Murphy, Supaplex.Murphy.getNeighbour("Down"));
+        }
+    }
     if(neighbour = Supaplex.checkIfMurphyShouldEat()) {
         Supaplex.MurphyEatNeighbour(neighbour);
         return;
@@ -36,6 +56,13 @@ Supaplex.processMurphy = function() {
                 case "Empty": case "Base": case "Infotron":
                     if(neighbour.reserved) break;
                     Supaplex.processRegularMove(neighbour);
+                    break;
+                case "Bug":
+                    if(!neighbour.bugActive) {
+                        Supaplex.processRegularMove(neighbour);
+                    } else {
+                        Supaplex.explode(neighbour);
+                    }
                     break;
                 case "Exit":
                     if(Supaplex.infotronsCollected >= Supaplex.levelInfo.InfotronsNeeded) {
@@ -54,10 +81,14 @@ Supaplex.processMurphy = function() {
                     break;
                 case "Zonk":
                     if(Supaplex.Murphy.direction !== "Left" && Supaplex.Murphy.direction !== "Right") break;
+                case "FloppyYellow":
                     var nextNeighbour = neighbour.getNeighbour(Supaplex.Murphy.direction);
                     if(nextNeighbour.type == "Empty" && !neighbour.falling && !nextNeighbour.reserved) {
                         Supaplex.processPush(neighbour, nextNeighbour);
                     }
+                    break;
+                case "PortUp": case "PortRight": case "PortDown": case "PortLeft":
+                    Supaplex.processPort(neighbour);
                     break;
             }
         } else {
@@ -72,7 +103,7 @@ Supaplex.processMurphy = function() {
 Supaplex.checkIfMurphyShouldEat = function() {
     if(Supaplex.keyBoard.space.down && !Supaplex.Murphy.moving && Supaplex.keyBoard.moving ) {
         var neighbour = Supaplex.Murphy.getNeighbour(Supaplex.Murphy.direction);
-        if(neighbour.type == "Base" || neighbour.type == "Infotron") {
+        if(neighbour.type == "Base" || neighbour.type == "Infotron" || neighbour.type == "Bug") {
             return neighbour;
         }
     }
@@ -80,6 +111,10 @@ Supaplex.checkIfMurphyShouldEat = function() {
 }
 
 Supaplex.MurphyEatNeighbour = function(neighbour) {
+    if(neighbour.type == "Bug" && neighbour.bugActive) {
+        Supaplex.explode(neighbour);
+        return;
+    }
     Supaplex.Murphy.eating = true;
     Supaplex.Murphy.eat(neighbour);
     Supaplex.Murphy.currentSpriteTile = 0;
@@ -88,6 +123,22 @@ Supaplex.MurphyEatNeighbour = function(neighbour) {
         Supaplex.infotronsCollected += 1;
     }
     return;
+}
+
+Supaplex.checkIfMurphyShouldFall = function() {
+    var neighbours = Supaplex.Murphy.getAllNeighbours();
+    var direction = Supaplex.Murphy.direction;
+    if(direction === "Down") direction = "Bottom";
+    if(direction === "Up") direction = "Top";
+    console.log(Supaplex.keyBoard[Supaplex.Murphy.direction], neighbours[direction].type);
+    if(Supaplex.keyBoard[Supaplex.Murphy.direction].down && (neighbours[direction].type == "Base"
+        || neighbours[direction].type == "Infotron")) {
+            return false;
+    }
+    if(neighbours.Bottom.type == "Empty") {
+        return true;
+    }
+    return false;
 }
 
 Supaplex.checkIfMurphyShouldMove = function() {
@@ -124,21 +175,50 @@ Supaplex.processPush = function(neighbour, nextNeighbour) {
     Supaplex.Murphy.wait(Supaplex.ANIMATION_TIMINGS.waitBeforePush, Supaplex.Murphy.pushing, [neighbour, Supaplex.Murphy.direction]);
 }
 
+Supaplex.processPort = function(neighbour) {
+    if(neighbour.type.indexOf(Supaplex.Murphy.direction) == -1) {
+        return;
+    }
+    var nextNeighbour = neighbour.getNeighbour(Supaplex.Murphy.direction);
+    if(nextNeighbour.type == "Empty") {
+        Supaplex.moveThroughPort(neighbour, nextNeighbour);
+    }
+    return;
+}
+
+Supaplex.processBug = function(tile) {
+    if(!tile.bugActive) {
+        debugger;
+        tile.timeSinceLastBug += Supaplex.fpsTimer;
+        if(tile.timeSinceLastBug >= tile.bugTimer) {
+            tile.bugActive = true;
+            tile.sprite = Supaplex.SPRITES["BugAnimation"];
+        }
+    }
+}
+
+Supaplex.moveThroughPort = function(neighbour, nextNeighbour) {
+    nextNeighbour.reserved = true;
+    nextNeighbour.reservedBy = Supaplex.Murphy;
+    Supaplex.Murphy.drawFirst = true;
+    Supaplex.Murphy.move(Supaplex.ANIMATION_TIMINGS.port, Supaplex.Murphy.direction, Supaplex.Murphy.animationClass, "exitPort");
+}
+
 Supaplex.processZonkOrInfotron = function(tile) {
     if (!tile.moving && !tile.waiting) {
         var allNeighbours = tile.getAllNeighbours();
-        if (Supaplex.canFallDown(tile, allNeighbours.bottom)) {
-            Supaplex.makeTileFall(tile, allNeighbours.bottom);
+        if (Supaplex.canFallDown(tile, allNeighbours.Bottom)) {
+            Supaplex.makeTileFall(tile, allNeighbours.Bottom);
             return;
         }
         var direction;
         if(direction = Supaplex.canMoveSideways(tile, allNeighbours)) {
             if(direction == "Left") {
-                var bottom = allNeighbours.bottomLeft,
-                side = allNeighbours.left;
+                var bottom = allNeighbours.BottomLeft,
+                side = allNeighbours.Left;
             } else {
-                var bottom = allNeighbours.bottomRight,
-                side = allNeighbours.right;
+                var bottom = allNeighbours.BottomRight,
+                side = allNeighbours.Right;
             }
             Supaplex.moveTileSideways(tile, direction, side, bottom);
         } else {
@@ -149,6 +229,27 @@ Supaplex.processZonkOrInfotron = function(tile) {
         if(tile.checkForLastMove(tile.direction, tile)) {
             Supaplex.checkIfTileIsFallingOnSomething(tile);
         }
+    }
+}
+
+Supaplex.processOrangeFloppy = function(tile) {
+    if(!tile.moving) {
+        var neighbour = tile.getNeighbour("Down");
+        if(Supaplex.canFallDown(tile, neighbour)) {
+            Supaplex.makeTileFall(tile, neighbour);
+        }
+    } else {
+        tile.move(tile.animationTiming, tile.direction, tile.animationClass, tile.moveEndCallback, tile.moveAmount);
+        if(tile.checkForLastMove(tile.direction, tile)) {
+            Supaplex.checkIfTileIsFallingOnSomething(tile);
+        }
+    }
+}
+
+Supaplex.processYellowFloppy = function(tile) {
+    if(tile.moving) {
+        tile.move(tile.animationTiming, tile.direction, tile.animationClass, tile.moveEndCallback, tile.moveAmount);
+        tile.checkForLastMove(tile.direction, tile);
     }
 }
 
@@ -163,7 +264,9 @@ Supaplex.canFallDown = function(tile, neighbour) {
 }
 
 Supaplex.makeTileFall = function(tile, neighbour) {
-    tile.move(Supaplex.ANIMATION_TIMINGS.regularMove, "Down", tile.type, "changeLocation");
+    var animClass = tile.type;
+    if(tile.type == "Murphy") animClass = tile.animationClass;
+    tile.move(Supaplex.ANIMATION_TIMINGS.regularMove, "Down", animClass, "changeLocation");
     tile.animationTiming = Supaplex.ANIMATION_TIMINGS.regularMove;
     tile.direction = "Down";
     tile.falling = true;
@@ -172,7 +275,7 @@ Supaplex.makeTileFall = function(tile, neighbour) {
 }
 
 Supaplex.canMoveSideways = function(tile, neighbours) {
-    var bottom = neighbours.bottom;
+    var bottom = neighbours.Bottom;
     if(bottom.moving) {
         return false;
     }
@@ -180,10 +283,10 @@ Supaplex.canMoveSideways = function(tile, neighbours) {
     if(names.indexOf(bottom.type) == -1) {
         return false;
     }
-    if(Supaplex.checkDirection(neighbours.bottomLeft, neighbours.left, neighbours.topLeft)) {
+    if(Supaplex.checkDirection(neighbours.BottomLeft, neighbours.Left, neighbours.TopLeft)) {
         return "Left";
     }
-    if(Supaplex.checkDirection(neighbours.bottomRight, neighbours.right, neighbours.topRight)) {
+    if(Supaplex.checkDirection(neighbours.BottomRight, neighbours.Right, neighbours.TopRight)) {
         return "Right";
     }
     return false;
@@ -224,13 +327,16 @@ Supaplex.checkIfTileIsFallingOnSomething = function(tile) {
     if(tile.direction !== "Down") {
         return;
     }
-    if(Supaplex.MurphyGetsHit(tile)) {
+    var neighbour = tile.getNeighbour("Down");
+    if(Supaplex.MurphyGetsHit(tile, neighbour)) {
         Supaplex.explode(Supaplex.Murphy);
+    }
+    if(neighbour.type == "FloppyOrange") {
+        Supaplex.explode(neighbour);
     }
 }
 
-Supaplex.MurphyGetsHit = function(tile) {
-    var neighbour = tile.getNeighbour("Down");
+Supaplex.MurphyGetsHit = function(tile, neighbour) {
     if(neighbour == Supaplex.Murphy) {
         if(!Supaplex.Murphy.moving) {
             return true;
