@@ -54,6 +54,7 @@ Supaplex.init = function () {
     Supaplex.fpsCounter = 0;
     Supaplex.fpsTimer = 0;
     Supaplex.FPS = 60;
+    Supaplex.fpsTimerElem = document.getElementById("fpsTimer");
     Supaplex.ElapsedTime = 0; // Allright, maybe I'm using the times for something else.
     Supaplex.levelInfo = {};
     Supaplex.Zonks = []; // Same as scissors, dunno if i'm going to use it yet.
@@ -64,7 +65,6 @@ Supaplex.init = function () {
     Supaplex.justUnPaused = false; //debuggin stuff....
     Supaplex.moveCounter = 0; // Also debug shit
     Supaplex.levelElem = document.getElementById("level");
-    // Supaplex.levelCopy = document.getElementById("copy");
     Supaplex.levelCtx = Supaplex.levelElem.getContext("2d");
     // Supaplex.copyCtx = Supaplex.levelCopy.getContext("2d");
     Supaplex.levelWidth = window.innerWidth;
@@ -86,8 +86,10 @@ Supaplex.init = function () {
         FloppyOrange: {source: document.getElementById("FloppyOrange"), tiles: 1},
         FloppyRed: {source: document.getElementById("FloppyRed"), tiles: 1},
         FloppyYellow: {source: document.getElementById("FloppyYellow"), tiles: 1, duration: Supaplex.ANIMATION_TIMINGS.pushing, tiles: 1, callBack: "fallingEnd"},
+        Hardware3: {source: document.getElementById("Hardware3"), tiles: 1},
         Hardware4: {source: document.getElementById("Hardware4"), tiles: 1},
         Hardware5: {source: document.getElementById("Hardware5"), tiles: 1},
+        Hardware6: {source: document.getElementById("Hardware6"), tiles: 1},
         Infotron: {source: document.getElementById("Infotron"), tiles: 1},
         InfotronFallingLeft: {source: document.getElementById("InfotronFallingLeft"), duration: Supaplex.ANIMATION_TIMINGS.falling, tiles: 8, callBack: "fallingEnd"},
         InfotronFallingRight: {source: document.getElementById("InfotronFallingRight"), duration: Supaplex.ANIMATION_TIMINGS.falling, tiles: 8, callBack: "fallingEnd"},
@@ -130,7 +132,7 @@ Supaplex.init = function () {
         ZonkPushedLeft: {source: document.getElementById("ZonkFallingRight"), duration: Supaplex.ANIMATION_TIMINGS.pushing, tiles: 4, callBack: "fallingEnd"}
     };
 
-    Supaplex.loadLevel(Supaplex.LEVELURL, 9);
+    Supaplex.loadLevel(Supaplex.LEVELURL, 1);
 }
 
 // let's start this thing.

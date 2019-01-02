@@ -54,6 +54,7 @@ Supaplex.init = function () {
     Supaplex.fpsCounter = 0;
     Supaplex.fpsTimer = 0;
     Supaplex.FPS = 60;
+    Supaplex.fpsTimerElem = document.getElementById("fpsTimer");
     Supaplex.ElapsedTime = 0; // Allright, maybe I'm using the times for something else.
     Supaplex.levelInfo = {};
     Supaplex.Zonks = []; // Same as scissors, dunno if i'm going to use it yet.
@@ -64,7 +65,6 @@ Supaplex.init = function () {
     Supaplex.justUnPaused = false; //debuggin stuff....
     Supaplex.moveCounter = 0; // Also debug shit
     Supaplex.levelElem = document.getElementById("level");
-    // Supaplex.levelCopy = document.getElementById("copy");
     Supaplex.levelCtx = Supaplex.levelElem.getContext("2d");
     // Supaplex.copyCtx = Supaplex.levelCopy.getContext("2d");
     Supaplex.levelWidth = window.innerWidth;
@@ -86,8 +86,10 @@ Supaplex.init = function () {
         FloppyOrange: {source: document.getElementById("FloppyOrange"), tiles: 1},
         FloppyRed: {source: document.getElementById("FloppyRed"), tiles: 1},
         FloppyYellow: {source: document.getElementById("FloppyYellow"), tiles: 1, duration: Supaplex.ANIMATION_TIMINGS.pushing, tiles: 1, callBack: "fallingEnd"},
+        Hardware3: {source: document.getElementById("Hardware3"), tiles: 1},
         Hardware4: {source: document.getElementById("Hardware4"), tiles: 1},
         Hardware5: {source: document.getElementById("Hardware5"), tiles: 1},
+        Hardware6: {source: document.getElementById("Hardware6"), tiles: 1},
         Infotron: {source: document.getElementById("Infotron"), tiles: 1},
         InfotronFallingLeft: {source: document.getElementById("InfotronFallingLeft"), duration: Supaplex.ANIMATION_TIMINGS.falling, tiles: 8, callBack: "fallingEnd"},
         InfotronFallingRight: {source: document.getElementById("InfotronFallingRight"), duration: Supaplex.ANIMATION_TIMINGS.falling, tiles: 8, callBack: "fallingEnd"},
@@ -130,7 +132,7 @@ Supaplex.init = function () {
         ZonkPushedLeft: {source: document.getElementById("ZonkFallingRight"), duration: Supaplex.ANIMATION_TIMINGS.pushing, tiles: 4, callBack: "fallingEnd"}
     };
 
-    Supaplex.loadLevel(Supaplex.LEVELURL, 9);
+    Supaplex.loadLevel(Supaplex.LEVELURL, 1);
 }
 
 // let's start this thing.
@@ -454,7 +456,7 @@ Supaplex.getTitle = function (data) {
 Supaplex.getTile = function(data, i, j){
     var tile = Object.create(Tile)
     //Tile (ID, locationX, locationY, type, exploding, bomb, movable, active, position.x, position.y);
-    if(i == 21 && j == 3) console.log(data.toString(16));
+    if(i == 14 && j == 20) console.log(data.toString(16));
     switch (data.toString(16)) {
         case "0":
             tile.init(j, i, "Empty", true, false, false, true, "Empty");
@@ -552,11 +554,17 @@ Supaplex.getTile = function(data, i, j){
         case "1b": //RAM horizontal, right part
             tile.init(j, i, "RAMRight", true, false, false, true, "RAMRight");
             break;
+        case "1e":
+            tile.init(j, i, "Hardware", false, false, false, true, "Hardware3");
+            break;
         case "1f":
             tile.init(j, i, "Hardware", false, false, false, true, "Hardware4");
             break;
         case "20":
             tile.init(j, i, "Hardware", false, false, false, true, "Hardware5");
+            break;
+        case "21":
+            tile.init(j, i, "Hardware", false, false, false, true, "Hardware6");
             break;
 
         case "26": //RAM vertical, top part
@@ -676,6 +684,9 @@ Supaplex.processMurphy = function() {
 Supaplex.checkIfMurphyShouldEat = function() {
     if(Supaplex.keyBoard.space.down && !Supaplex.Murphy.moving && Supaplex.keyBoard.moving ) {
         var neighbour = Supaplex.Murphy.getNeighbour(Supaplex.Murphy.direction);
+        if(neighbour.type == "Infotron" && neighbour.moving) {
+            return false;
+        }
         if(neighbour.type == "Base" || neighbour.type == "Infotron" || neighbour.type == "Bug") {
             return neighbour;
         }
@@ -761,7 +772,6 @@ Supaplex.processPort = function(neighbour) {
 
 Supaplex.processBug = function(tile) {
     if(!tile.bugActive) {
-        debugger;
         tile.timeSinceLastBug += Supaplex.fpsTimer;
         if(tile.timeSinceLastBug >= tile.bugTimer) {
             tile.bugActive = true;
@@ -924,6 +934,7 @@ Supaplex.loop = function() {
     Supaplex.fpsCounter += 1;
     Supaplex.fpsTimer = (performance.now() - Supaplex.lastLogicUpdate);
     Supaplex.FPS = 1000 / Supaplex.fpsTimer;
+    // Supaplex.fpsTimerElem.innerHTML = Math.round(Supaplex.FPS);
     // if(Supaplex.fpsTimer > 1000) {
     //     Supaplex.FPS = Supaplex.fpsCounter;
     //     if(Supaplex.FPS < 60) {

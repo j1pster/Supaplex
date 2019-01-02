@@ -103,6 +103,9 @@ Supaplex.processMurphy = function() {
 Supaplex.checkIfMurphyShouldEat = function() {
     if(Supaplex.keyBoard.space.down && !Supaplex.Murphy.moving && Supaplex.keyBoard.moving ) {
         var neighbour = Supaplex.Murphy.getNeighbour(Supaplex.Murphy.direction);
+        if(neighbour.type == "Infotron" && neighbour.moving) {
+            return false;
+        }
         if(neighbour.type == "Base" || neighbour.type == "Infotron" || neighbour.type == "Bug") {
             return neighbour;
         }
@@ -188,7 +191,6 @@ Supaplex.processPort = function(neighbour) {
 
 Supaplex.processBug = function(tile) {
     if(!tile.bugActive) {
-        debugger;
         tile.timeSinceLastBug += Supaplex.fpsTimer;
         if(tile.timeSinceLastBug >= tile.bugTimer) {
             tile.bugActive = true;

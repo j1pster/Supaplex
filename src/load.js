@@ -84,7 +84,7 @@ Supaplex.getTitle = function (data) {
 Supaplex.getTile = function(data, i, j){
     var tile = Object.create(Tile)
     //Tile (ID, locationX, locationY, type, exploding, bomb, movable, active, position.x, position.y);
-    if(i == 21 && j == 3) console.log(data.toString(16));
+    if(i == 14 && j == 20) console.log(data.toString(16));
     switch (data.toString(16)) {
         case "0":
             tile.init(j, i, "Empty", true, false, false, true, "Empty");
@@ -182,11 +182,17 @@ Supaplex.getTile = function(data, i, j){
         case "1b": //RAM horizontal, right part
             tile.init(j, i, "RAMRight", true, false, false, true, "RAMRight");
             break;
+        case "1e":
+            tile.init(j, i, "Hardware", false, false, false, true, "Hardware3");
+            break;
         case "1f":
             tile.init(j, i, "Hardware", false, false, false, true, "Hardware4");
             break;
         case "20":
             tile.init(j, i, "Hardware", false, false, false, true, "Hardware5");
+            break;
+        case "21":
+            tile.init(j, i, "Hardware", false, false, false, true, "Hardware6");
             break;
 
         case "26": //RAM vertical, top part

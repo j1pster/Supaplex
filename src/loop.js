@@ -2,6 +2,7 @@ Supaplex.loop = function() {
     Supaplex.fpsCounter += 1;
     Supaplex.fpsTimer = (performance.now() - Supaplex.lastLogicUpdate);
     Supaplex.FPS = 1000 / Supaplex.fpsTimer;
+    // Supaplex.fpsTimerElem.innerHTML = Math.round(Supaplex.FPS);
     // if(Supaplex.fpsTimer > 1000) {
     //     Supaplex.FPS = Supaplex.fpsCounter;
     //     if(Supaplex.FPS < 60) {
